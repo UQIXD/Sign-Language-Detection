@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deteksi Bahasa Isyarat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="bg-gray-100 flex flex-col items-center justify-center min-h-screen font-sans"
+  >
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">
+      🤟 Deteksi Bahasa Isyarat
+    </h1>
+
+    <div class="bg-white shadow-xl rounded-2xl p-6 w-full max-w-lg text-center">
+      <video
+        id="video"
+        autoplay
+        playsinline
+        class="rounded-xl w-full h-64 object-cover border-2 border-gray-300"
+      ></video>
+
+      <div class="mt-4 flex justify-center gap-3">
+        <button
+          id="startButton"
+          class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+        >
+          🎥 Nyalakan Kamera
+        </button>
+        <button
+          id="captureButton"
+          class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition"
+        >
+          📸 Ambil Gambar (Timer 5s)
+        </button>
+      </div>
+
+      <p id="timerText" class="text-xl text-gray-700 mt-3 font-semibold"></p>
+
+      <canvas id="canvas" class="hidden"></canvas>
+
+      <div id="resultContainer" class="mt-6 hidden">
+        <h2 class="text-xl font-semibold mb-2 text-gray-800">Hasil Deteksi:</h2>
+        <img id="resultImage" class="w-full rounded-lg shadow-md border" />
+        <ul
+          id="detectionsList"
+          class="mt-3 text-left list-disc list-inside text-gray-700"
+        ></ul>
+      </div>
+    </div>
+
+    <footer class="mt-6 text-sm text-gray-500">
+      Dibuat dengan 💙 oleh Faruqi Rabbani
+    </footer>
+
+    <script>
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+      const captureButton = document.getElementById("captureButton");
+      const startButton = document.getElementById("startButton");
+      const timerText = document.getElementById("timerText");
+      const resultContainer = document.getElementById("resultContainer");
+      const resultImage = document.getElementById("resultImage");
+      const detectionsList = document.getElementById("detectionsList");
+
+      // Ganti URL di bawah ini dengan URL ngrok kamu dari Colab
+      const API_URL = "https://d5b41e97035f.ngrok-free.app/detect";
+
+      // === Aktifkan Kamera ===
+      startButton.onclick = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          video.srcObject = stream;
+        } catch (err) {
+          alert("Tidak dapat mengakses kamera: " + err);
+        }
+      };
+
+      // === Timer 5 Detik lalu Ambil Foto ===
+      captureButton.onclick = async () => {
+        let timeLeft = 5;
+        timerText.textContent = `📸 Mengambil gambar dalam ${timeLeft} detik...`;
+        const countdown = setInterval(() => {
+          timeLeft--;
+          timerText.textContent = `📸 Mengambil gambar dalam ${timeLeft} detik...`;
+          if (timeLeft === 0) {
+            clearInterval(countdown);
+            timerText.textContent = "📷 Mengambil gambar...";
+            captureAndSend();
+          }
+        }, 1000);
+      };
+
+      // === Ambil Gambar dari Kamera dan Kirim ke Flask ===
+      async function captureAndSend() {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext("2d");
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL("image/jpeg");
+
+        try {
+          const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: imageData }),
+          });
+
+          const result = await response.json();
+          if (result.error) {
+            alert("Terjadi kesalahan: " + result.error);
+            return;
+          }
+
+          showResult(result);
+        } catch (error) {
+          alert("Gagal mengirim gambar ke server: " + error);
+        } finally {
+          timerText.textContent = "";
+        }
+      }
+
+      // === Tampilkan Hasil Deteksi ===
+      function showResult(result) {
+        resultContainer.classList.remove("hidden");
+        resultImage.src = result.image;
+        detectionsList.innerHTML = "";
+
+        if (result.detections.length === 0) {
+          detectionsList.innerHTML = "<li>Tidak ada deteksi.</li>";
+          return;
+        }
+
+        result.detections.forEach((det) => {
+          const li = document.createElement("li");
+          li.textContent = `${det.label} (${(det.confidence * 100).toFixed(
+            1
+          )}%)`;
+          detectionsList.appendChild(li);
+        });
+      }
+    </script>
+  </body>
+</html>

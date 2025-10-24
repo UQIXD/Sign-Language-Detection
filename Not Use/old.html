@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deteksi Bahasa Isyarat | YOLOv8 ONNX</title>
+
+    <link rel="icon" href="data:," />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/ort.min.js"></script>
+
+    <style>
+      body {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        color: white;
+        font-family: "Inter", sans-serif;
+      }
+      canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+    </style>
+  </head>
+
+  <body
+    class="flex flex-col items-center justify-center min-h-screen text-center"
+  >
+    <h1 class="text-3xl font-bold mb-6 text-blue-400">
+      🖐️ Deteksi Bahasa Isyarat (Realtime)
+    </h1>
+
+    <div
+      id="video-container"
+      class="relative border-4 border-blue-500 rounded-2xl overflow-hidden shadow-2xl"
+    >
+      <video
+        id="video"
+        autoplay
+        playsinline
+        class="w-[640px] h-[480px] object-cover"
+      ></video>
+      <canvas id="overlay" width="640" height="480"></canvas>
+    </div>
+
+    <div
+      id="result-box"
+      class="mt-6 px-6 py-3 text-xl font-semibold bg-blue-500 text-white rounded-xl shadow-lg w-fit transition-all duration-300"
+    >
+      Memuat model...
+    </div>
+
+    <script>
+      const MODEL_PATH = "./best.onnx";
+      const INPUT_SIZE = 640;
+      const CLASS_NAMES = [
+        "A",
+        "Ayah",
+        "B",
+        "D",
+        "H",
+        "Halo",
+        "Kakak",
+        "L",
+        "Minum",
+        "Rumah",
+        "Sama-sama",
+        "Sehat",
+        "Teman",
+        "Terima Kasih",
+        "Tidur",
+        "U",
+        "Y",
+      ];
+
+      let session;
+      const video = document.getElementById("video");
+      const overlay = document.getElementById("overlay");
+      const ctx = overlay.getContext("2d");
+      const resultBox = document.getElementById("result-box");
+
+      // ✅ Performa lebih baik & hilangkan warning canvas
+      const hiddenCanvas = document.createElement("canvas");
+      hiddenCanvas.width = INPUT_SIZE;
+      hiddenCanvas.height = INPUT_SIZE;
+      const hiddenCtx = hiddenCanvas.getContext("2d", {
+        willReadFrequently: true,
+      });
+
+      async function start() {
+        try {
+          resultBox.textContent = "Memuat model...";
+
+          // ✅ PERBAIKAN UTAMA: Arahkan ONNX Runtime ke lokasi file WASM.
+          // Ini mengatasi masalah kegagalan memuat modul WebAssembly
+          // yang dibutuhkan oleh pustaka ort.min.js dari CDN.
+          ort.env.wasm.wasmPaths =
+            "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/";
+
+          session = await ort.InferenceSession.create(MODEL_PATH);
+          resultBox.textContent = "Model siap! Mengaktifkan kamera...";
+
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          video.srcObject = stream;
+
+          video.onloadedmetadata = () => {
+            video.play();
+            detectLoop();
+          };
+        } catch (e) {
+          console.error(e);
+          resultBox.textContent = "Gagal memuat model atau kamera.";
+        }
+      }
+
+      async function detectLoop() {
+        if (!session) return;
+        if (video.readyState === 4) {
+          hiddenCtx.drawImage(video, 0, 0, INPUT_SIZE, INPUT_SIZE);
+          const imageData = hiddenCtx.getImageData(
+            0,
+            0,
+            INPUT_SIZE,
+            INPUT_SIZE
+          );
+          const inputTensor = new ort.Tensor("float32", preprocess(imageData), [
+            1,
+            3,
+            INPUT_SIZE,
+            INPUT_SIZE,
+          ]);
+
+          const feeds = { [session.inputNames[0]]: inputTensor };
+          const results = await session.run(feeds);
+          const output = results[session.outputNames[0]];
+          const data = output.data;
+          const dims = output.dims;
+
+          const detected = postprocessYoloV8(data, dims);
+
+          ctx.clearRect(0, 0, overlay.width, overlay.height);
+          if (detected) {
+            const { box, label, confidence } = detected;
+            drawBox(box, label, confidence);
+            resultBox.textContent = `Terdeteksi: ${label} (${(
+              confidence * 100
+            ).toFixed(1)}%)`;
+            resultBox.classList.replace("bg-blue-500", "bg-green-500");
+          } else {
+            resultBox.textContent = "Tidak terdeteksi";
+            resultBox.classList.replace("bg-green-500", "bg-blue-500");
+          }
+        }
+        requestAnimationFrame(detectLoop);
+      }
+
+      function preprocess(imageData) {
+        const { data, width, height } = imageData;
+        const floatData = new Float32Array(width * height * 3);
+        for (let i = 0; i < width * height; i++) {
+          floatData[i] = data[i * 4] / 255.0;
+          floatData[i + width * height] = data[i * 4 + 1] / 255.0;
+          floatData[i + 2 * width * height] = data[i * 4 + 2] / 255.0;
+        }
+        return floatData;
+      }
+
+      function postprocessYoloV8(data, dims, confThreshold = 0.4) {
+        const numClasses = CLASS_NAMES.length;
+        const [batch, channels, numPreds] = dims;
+        const boxes = [];
+        const scores = [];
+
+        for (let i = 0; i < numPreds; i++) {
+          const x = data[0 * numPreds + i];
+          const y = data[1 * numPreds + i];
+          const w = data[2 * numPreds + i];
+          const h = data[3 * numPreds + i];
+          const objConf = data[4 * numPreds + i];
+          let maxClassScore = -Infinity;
+          let classIndex = -1;
+
+          for (let c = 0; c < numClasses; c++) {
+            const classScore = data[(5 + c) * numPreds + i];
+            if (classScore > maxClassScore) {
+              maxClassScore = classScore;
+              classIndex = c;
+            }
+          }
+
+          const confidence = objConf * maxClassScore;
+          if (confidence > confThreshold) {
+            boxes.push([
+              (x - w / 2) * (overlay.width / INPUT_SIZE),
+              (y - h / 2) * (overlay.height / INPUT_SIZE),
+              w * (overlay.width / INPUT_SIZE),
+              h * (overlay.height / INPUT_SIZE),
+            ]);
+            scores.push({
+              label: CLASS_NAMES[classIndex],
+              confidence,
+            });
+          }
+        }
+
+        if (boxes.length === 0) return null;
+        const bestIndex = scores.reduce(
+          (best, cur, i, arr) =>
+            cur.confidence > arr[best].confidence ? i : best,
+          0
+        );
+
+        return {
+          box: boxes[bestIndex],
+          label: scores[bestIndex].label,
+          confidence: scores[bestIndex].confidence,
+        };
+      }
+
+      function drawBox(box, label, confidence) {
+        const [x, y, w, h] = box;
+        ctx.strokeStyle = "#00FF00";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(x, y, w, h);
+        ctx.fillStyle = "#00FF00";
+        ctx.font = "18px Inter";
+        ctx.fillText(
+          `${label} ${(confidence * 100).toFixed(1)}%`,
+          x + 5,
+          y + 20
+        );
+      }
+
+      start();
+    </script>
+  </body>
+</html>

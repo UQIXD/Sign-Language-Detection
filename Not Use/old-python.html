@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deteksi Bahasa Isyarat Real-time</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+      body {
+        font-family: "Inter", sans-serif;
+      }
+
+      .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .video-container {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      }
+
+      .detection-box {
+        position: absolute;
+        border: 3px solid #10b981;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+      }
+
+      .prediction-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .loading-pulse {
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.6;
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body class="gradient-bg min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header -->
+      <header class="text-center mb-12 fade-in">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+          Deteksi Bahasa Isyarat Real-time
+        </h1>
+        <p class="text-xl opacity-90 max-w-2xl mx-auto">
+          Aplikasi ini menggunakan model ONNX untuk mendeteksi bahasa isyarat
+          dari kamera Anda secara real-time
+        </p>
+      </header>
+
+      <!-- Main Content -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Video Feed & Controls -->
+        <div class="lg:col-span-2">
+          <div class="video-container bg-black aspect-video relative">
+            <video
+              id="video"
+              autoplay
+              playsinline
+              class="w-full h-full object-cover"
+            ></video>
+            <canvas
+              id="canvas"
+              class="absolute top-0 left-0 w-full h-full pointer-events-none"
+            ></canvas>
+
+            <!-- Status Indicator -->
+            <div
+              id="status"
+              class="absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium bg-green-500"
+            >
+              <span id="status-text">Memulai...</span>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div
+              id="loading"
+              class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center"
+            >
+              <div class="text-center">
+                <div
+                  class="loading-pulse w-16 h-16 rounded-full border-4 border-white border-t-transparent mx-auto mb-4"
+                ></div>
+                <p>Memuat model dan kamera...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="mt-6 flex flex-wrap gap-4">
+            <button
+              id="start-btn"
+              class="px-6 py-3 bg-green-500 hover:bg-green-600 rounded-lg font-medium transition-colors flex items-center"
+            >
+              <svg
+                class="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                ></path>
+              </svg>
+              Mulai Deteksi
+            </button>
+
+            <button
+              id="stop-btn"
+              class="px-6 py-3 bg-red-500 hover:bg-red-600 rounded-lg font-medium transition-colors flex items-center"
+              disabled
+            >
+              <svg
+                class="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
+                ></path>
+              </svg>
+              Hentikan
+            </button>
+
+            <button
+              id="switch-camera"
+              class="px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-medium transition-colors flex items-center"
+            >
+              <svg
+                class="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                ></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                ></path>
+              </svg>
+              Ganti Kamera
+            </button>
+          </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="space-y-6">
+          <div class="prediction-card rounded-xl p-6">
+            <h2 class="text-xl font-semibold mb-4">Hasil Deteksi</h2>
+
+            <div id="prediction-result" class="text-center py-8">
+              <p class="text-lg opacity-80">
+                Mulai deteksi untuk melihat hasil
+              </p>
+            </div>
+
+            <div class="mt-6">
+              <h3 class="font-medium mb-2">Kemungkinan Lainnya</h3>
+              <div id="other-predictions" class="space-y-2">
+                <!-- Other predictions will appear here -->
+              </div>
+            </div>
+          </div>
+
+          <div class="prediction-card rounded-xl p-6">
+            <h2 class="text-xl font-semibold mb-4">Informasi</h2>
+
+            <div class="space-y-3">
+              <div class="flex justify-between">
+                <span>Status Model:</span>
+                <span id="model-status" class="font-medium">Memuat...</span>
+              </div>
+
+              <div class="flex justify-between">
+                <span>FPS:</span>
+                <span id="fps-counter" class="font-medium">0</span>
+              </div>
+
+              <div class="flex justify-between">
+                <span>Resolusi:</span>
+                <span id="resolution" class="font-medium">-</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="prediction-card rounded-xl p-6">
+            <h2 class="text-xl font-semibold mb-4">Panduan</h2>
+
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-start">
+                <svg
+                  class="w-4 h-4 mt-0.5 mr-2 text-green-400 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                Pastikan pencahayaan cukup
+              </li>
+              <li class="flex items-start">
+                <svg
+                  class="w-4 h-4 mt-0.5 mr-2 text-green-400 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                Tangan harus terlihat jelas di kamera
+              </li>
+              <li class="flex items-start">
+                <svg
+                  class="w-4 h-4 mt-0.5 mr-2 text-green-400 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                Gunakan latar belakang yang kontras
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Global variables
+      let model = null;
+      let session = null;
+      let isRunning = false;
+      let videoStream = null;
+      let currentCamera = "user"; // 'user' for front camera, 'environment' for back camera
+      let fpsCounter = 0;
+      let lastFpsUpdate = 0;
+      let frameCount = 0;
+
+      // DOM elements
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      const startBtn = document.getElementById("start-btn");
+      const stopBtn = document.getElementById("stop-btn");
+      const switchCameraBtn = document.getElementById("switch-camera");
+      const statusText = document.getElementById("status-text");
+      const statusIndicator = document.getElementById("status");
+      const loadingOverlay = document.getElementById("loading");
+      const predictionResult = document.getElementById("prediction-result");
+      const otherPredictions = document.getElementById("other-predictions");
+      const modelStatus = document.getElementById("model-status");
+      const fpsCounterElement = document.getElementById("fps-counter");
+      const resolutionElement = document.getElementById("resolution");
+
+      // Initialize the application
+      async function init() {
+        try {
+          // Load ONNX model
+          statusText.textContent = "Memuat model ONNX...";
+          modelStatus.textContent = "Memuat...";
+
+          // In a real implementation, you would load your actual model
+          // session = await ort.InferenceSession.create('./best.onnx');
+
+          // For demo purposes, we'll simulate model loading
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          modelStatus.textContent = "Model siap";
+          statusText.textContent = "Model siap";
+          statusIndicator.className =
+            "absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium bg-green-500";
+
+          // Set up camera
+          await setupCamera();
+
+          // Hide loading overlay
+          loadingOverlay.style.display = "none";
+
+          // Set up event listeners
+          startBtn.addEventListener("click", startDetection);
+          stopBtn.addEventListener("click", stopDetection);
+          switchCameraBtn.addEventListener("click", switchCamera);
+        } catch (error) {
+          console.error("Error during initialization:", error);
+          statusText.textContent = "Error: " + error.message;
+          statusIndicator.className =
+            "absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium bg-red-500";
+          modelStatus.textContent = "Error memuat model";
+        }
+      }
+
+      // Set up camera
+      async function setupCamera() {
+        try {
+          const constraints = {
+            video: {
+              facingMode: currentCamera,
+              width: { ideal: 640 },
+              height: { ideal: 480 },
+            },
+          };
+
+          videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+          video.srcObject = videoStream;
+
+          // Set canvas size to match video
+          video.addEventListener("loadedmetadata", () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            resolutionElement.textContent = `${video.videoWidth}x${video.videoHeight}`;
+          });
+        } catch (error) {
+          console.error("Error accessing camera:", error);
+          statusText.textContent = "Error mengakses kamera";
+          statusIndicator.className =
+            "absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium bg-red-500";
+        }
+      }
+
+      // Start detection
+      function startDetection() {
+        if (isRunning) return;
+
+        isRunning = true;
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        statusText.textContent = "Mendeteksi...";
+        statusIndicator.className =
+          "absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium bg-blue-500";
+
+        // Start processing frames
+        processFrame();
+      }
+
+      // Stop detection
+      function stopDetection() {
+        isRunning = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        statusText.textContent = "Dihentikan";
+        statusIndicator.className =
+          "absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-medium bg-yellow-500";
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Reset prediction display
+        predictionResult.innerHTML =
+          '<p class="text-lg opacity-80">Mulai deteksi untuk melihat hasil</p>';
+        otherPredictions.innerHTML = "";
+      }
+
+      // Switch between front and back camera
+      async function switchCamera() {
+        if (isRunning) {
+          stopDetection();
+        }
+
+        // Stop current stream
+        if (videoStream) {
+          videoStream.getTracks().forEach((track) => track.stop());
+        }
+
+        // Switch camera
+        currentCamera = currentCamera === "user" ? "environment" : "user";
+
+        // Set up new camera
+        await setupCamera();
+
+        statusText.textContent = "Kamera diganti";
+      }
+
+      // Process each video frame
+      async function processFrame() {
+        if (!isRunning) return;
+
+        // Update FPS counter
+        updateFps();
+
+        // Draw video frame to canvas
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // In a real implementation, you would:
+        // 1. Preprocess the frame for the model
+        // 2. Run inference using the ONNX model
+        // 3. Process the results and display them
+
+        // For demo purposes, we'll simulate detection
+        simulateDetection();
+
+        // Continue processing
+        requestAnimationFrame(processFrame);
+      }
+
+      // Simulate detection for demo purposes
+      function simulateDetection() {
+        // Draw a simulated detection box
+        const boxWidth = 200;
+        const boxHeight = 200;
+        const boxX = (canvas.width - boxWidth) / 2;
+        const boxY = (canvas.height - boxHeight) / 2;
+
+        ctx.strokeStyle = "#10B981";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+
+        // Simulate prediction results
+        const predictions = [
+          { label: "A", confidence: 0.92 },
+          { label: "B", confidence: 0.85 },
+          { label: "C", confidence: 0.78 },
+          { label: "D", confidence: 0.65 },
+          { label: "E", confidence: 0.54 },
+        ];
+
+        // Update prediction display
+        updatePredictionDisplay(predictions);
+      }
+
+      // Update prediction display
+      function updatePredictionDisplay(predictions) {
+        if (!predictions || predictions.length === 0) return;
+
+        // Update main prediction
+        const topPrediction = predictions[0];
+        predictionResult.innerHTML = `
+                <div class="fade-in">
+                    <div class="text-6xl font-bold mb-2">${
+                      topPrediction.label
+                    }</div>
+                    <div class="text-lg opacity-80">${(
+                      topPrediction.confidence * 100
+                    ).toFixed(1)}% yakin</div>
+                </div>
+            `;
+
+        // Update other predictions
+        otherPredictions.innerHTML = "";
+        predictions.slice(1).forEach((pred) => {
+          const predictionElement = document.createElement("div");
+          predictionElement.className = "flex justify-between items-center";
+          predictionElement.innerHTML = `
+                    <span>${pred.label}</span>
+                    <div class="w-24 bg-gray-700 rounded-full h-2.5">
+                        <div class="bg-green-500 h-2.5 rounded-full" style="width: ${
+                          pred.confidence * 100
+                        }%"></div>
+                    </div>
+                    <span class="text-sm w-10 text-right">${(
+                      pred.confidence * 100
+                    ).toFixed(1)}%</span>
+                `;
+          otherPredictions.appendChild(predictionElement);
+        });
+      }
+
+      // Update FPS counter
+      function updateFps() {
+        frameCount++;
+        const now = performance.now();
+
+        if (now >= lastFpsUpdate + 1000) {
+          fpsCounter = frameCount;
+          frameCount = 0;
+          lastFpsUpdate = now;
+
+          fpsCounterElement.textContent = fpsCounter;
+        }
+      }
+
+      // Initialize the app when the page loads
+      window.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>

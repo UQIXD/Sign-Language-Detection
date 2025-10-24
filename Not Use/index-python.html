@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YOLO Realtime - Google Colab</title>
+    <style>
+      body {
+        font-family: Inter, system-ui, sans-serif;
+        display: flex;
+        gap: 20px;
+        padding: 20px;
+        background: #f4f4f4;
+      }
+      #wrapper {
+        position: relative;
+        width: 640px;
+      }
+      video {
+        background: transparent !important;
+      }
+
+      video,
+      canvas {
+        border-radius: 8px;
+        background: #111;
+        display: block;
+      }
+      #controls {
+        max-width: 420px;
+        background: #fff;
+        padding: 16px;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+      .info {
+        margin-top: 8px;
+        font-size: 14px;
+      }
+      .badge {
+        display: inline-block;
+        background: #111;
+        color: #fff;
+        padding: 6px 8px;
+        border-radius: 6px;
+        margin-right: 6px;
+      }
+      #overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="wrapper" style="position: relative; width: 640px; height: 480px">
+      <video
+        id="video"
+        autoplay
+        playsinline
+        width="640"
+        height="480"
+        style="object-fit: cover"
+      ></video>
+      <canvas
+        id="overlay"
+        width="640"
+        height="480"
+        style="position: absolute; top: 0; left: 0"
+      ></canvas>
+    </div>
+
+    <div id="controls">
+      <h2>Realtime YOLOv8 Detection (Google Colab)</h2>
+      <p class="info">Model backend: <code>best.pt</code></p>
+
+      <div style="margin-top: 8px">
+        <label>
+          Interval deteksi (ms):
+          <input id="interval" type="number" value="400" style="width: 100px" />
+        </label>
+      </div>
+
+      <div style="margin-top: 8px">
+        <button id="startBtn">Mulai</button>
+        <button id="stopBtn" disabled>Berhenti</button>
+      </div>
+
+      <div class="info">
+        <span class="badge" id="status">Status: idle</span>
+        <span class="badge" id="fps">FPS: 0</span>
+        <span class="badge" id="lat">Latency: 0 ms</span>
+      </div>
+
+      <p style="margin-top: 12px; font-size: 13px; color: #444">
+        💡 Catatan: Sesuaikan interval agar performa stabil. Pastikan backend
+        dari Google Colab berjalan dan URL ngrok diisi dengan benar.
+      </p>
+    </div>
+
+    <script>
+      const BACKEND_URL = "https://8afcecfc11b6.ngrok-free.app/detect";
+
+      const video = document.getElementById("video");
+      const overlay = document.getElementById("overlay");
+      const ctx = overlay.getContext("2d");
+      const statusEl = document.getElementById("status");
+      const fpsEl = document.getElementById("fps");
+      const latEl = document.getElementById("lat");
+      const startBtn = document.getElementById("startBtn");
+      const stopBtn = document.getElementById("stopBtn");
+      const intervalInput = document.getElementById("interval");
+
+      let stream;
+      let running = false;
+      let detectTimer = null;
+      let lastFrameTime = performance.now();
+      let frameCount = 0;
+      let fps = 0;
+
+      async function startCamera() {
+        const video = document.getElementById("video");
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          video.srcObject = stream;
+        } catch (err) {
+          console.error("Gagal mengakses kamera:", err);
+          alert("Tidak bisa mengakses kamera. Pastikan izin diberikan.");
+        }
+      }
+
+      window.onload = startCamera;
+
+      function setStatus(s) {
+        statusEl.textContent = "Status: " + s;
+      }
+
+      async function sendFrameAndDetect() {
+        if (!running) return;
+        if (!video || video.readyState < 2) {
+          scheduleNext();
+          return;
+        }
+
+        // Ambil frame dari kamera dan ubah ke base64
+        const w = 640,
+          h = 640;
+        const tmp = document.createElement("canvas");
+        tmp.width = w;
+        tmp.height = h;
+        const tctx = tmp.getContext("2d");
+        tctx.drawImage(video, 0, 0, w, h);
+        const imgData = tmp.toDataURL("image/jpeg", 0.6);
+
+        setStatus("Mengirim frame...");
+
+        const t0 = performance.now();
+        try {
+          const res = await fetch(BACKEND_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: imgData }),
+          });
+
+          const t1 = performance.now();
+
+          if (!res.ok) {
+            console.error("Server error");
+            setStatus("Error dari server");
+            scheduleNext();
+            return;
+          }
+
+          const data = await res.json();
+          const inferTime = (data.inference_time || 0) * 1000;
+          const roundLatency = Math.round(t1 - t0);
+          latEl.textContent = "Latency: " + roundLatency + " ms";
+
+          drawDetections(data.detections || []);
+          setStatus("Deteksi sukses (" + Math.round(inferTime) + " ms)");
+
+          frameCount++;
+          const now = performance.now();
+          if (now - lastFrameTime >= 1000) {
+            fps = frameCount;
+            frameCount = 0;
+            lastFrameTime = now;
+            fpsEl.textContent = "FPS: " + fps;
+          }
+        } catch (e) {
+          console.error("Fetch error", e);
+          setStatus("Gagal koneksi ke backend");
+        }
+
+        scheduleNext();
+      }
+
+      function drawDetections(dets) {
+        ctx.clearRect(0, 0, overlay.width, overlay.height);
+        ctx.lineWidth = 2;
+        ctx.font = "16px sans-serif";
+        ctx.textBaseline = "top";
+
+        const scaleX = overlay.width / 640;
+        const scaleY = overlay.height / 640;
+
+        dets.forEach((d) => {
+          const x1 = d.x1 * scaleX,
+            y1 = d.y1 * scaleY,
+            x2 = d.x2 * scaleX,
+            y2 = d.y2 * scaleY;
+          const w = x2 - x1,
+            h = y2 - y1;
+
+          ctx.strokeStyle = "#00FF00";
+          ctx.strokeRect(x1, y1, w, h);
+
+          const label = `${d.label} ${(d.conf * 100).toFixed(1)}%`;
+          const textWidth = ctx.measureText(label).width;
+          ctx.fillStyle = "rgba(0,0,0,0.6)";
+          ctx.fillRect(x1, y1 - 20, textWidth + 8, 20);
+
+          ctx.fillStyle = "white";
+          ctx.fillText(label, x1 + 4, y1 - 18);
+        });
+      }
+
+      function scheduleNext() {
+        if (!running) return;
+        const interval = parseInt(intervalInput.value) || 400;
+        if (detectTimer) clearTimeout(detectTimer);
+        detectTimer = setTimeout(sendFrameAndDetect, interval);
+      }
+
+      startBtn.addEventListener("click", async () => {
+        startBtn.disabled = true;
+        await startCamera();
+        running = true;
+        stopBtn.disabled = false;
+        setStatus("Berjalan...");
+        frameCount = 0;
+        lastFrameTime = performance.now();
+        sendFrameAndDetect();
+      });
+
+      stopBtn.addEventListener("click", () => {
+        running = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        setStatus("Dihentikan");
+        if (detectTimer) clearTimeout(detectTimer);
+        if (stream) {
+          stream.getTracks().forEach((t) => t.stop());
+          stream = null;
+        }
+        ctx.clearRect(0, 0, overlay.width, overlay.height);
+      });
+    </script>
+  </body>
+</html>

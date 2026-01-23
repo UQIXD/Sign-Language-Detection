@@ -5,43 +5,300 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Realtime Deteksi Bahasa Isyarat</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .card-hover:hover {
+        transform: translateY(-5px);
+        transition: all 0.3s ease;
+      }
+      .video-container {
+        position: relative;
+      }
+      .detection-overlay {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+    </style>
   </head>
-  <body
-    class="bg-gray-100 flex flex-col items-center justify-center min-h-screen"
-  >
-    <h1 class="text-3xl font-bold text-gray-800 mb-4">
-      🤟 Deteksi Bahasa Isyarat Realtime
-    </h1>
+  <body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-md py-4 px-6">
+      <div
+        class="container mx-auto flex flex-col md:flex-row justify-between items-center"
+      >
+        <div class="flex items-center space-x-3 mb-4 md:mb-0">
+          <div class="bg-blue-100 p-3 rounded-full">
+            <i class="fas fa-hands text-blue-600 text-2xl"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">
+              🤟 Deteksi Bahasa Isyarat Realtime
+            </h1>
+            <p class="text-gray-600 text-sm">
+              Deteksi gerakan tangan secara realtime menggunakan AI
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span
+            class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full"
+          >
+            <i class="fas fa-circle animate-pulse mr-1"></i> AI Aktif
+          </span>
+        </div>
+      </div>
+    </header>
 
-    <div class="bg-white shadow-xl rounded-2xl p-6 w-full max-w-lg text-center">
-      <video
-        id="video"
-        autoplay
-        playsinline
-        class="rounded-xl w-full h-64 object-cover border-2 border-gray-300"
-      ></video>
+    <main class="container mx-auto px-4 py-8">
+      <!-- Kamera dan Hasil Deteksi (Desktop: bersebelahan) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <!-- Kamera -->
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800 flex items-center">
+              <i class="fas fa-video mr-2 text-blue-500"></i> Kamera Live
+            </h2>
+            <div class="text-sm text-gray-500">
+              <i class="fas fa-user mr-1"></i> Mode Pengguna
+            </div>
+          </div>
 
-      <canvas id="canvas" class="hidden"></canvas>
+          <div
+            class="video-container rounded-xl overflow-hidden border-4 border-gray-200"
+          >
+            <video
+              id="video"
+              autoplay
+              playsinline
+              class="w-full h-64 md:h-80 object-cover"
+            ></video>
+            <div class="detection-overlay" id="statusOverlay">
+              <i class="fas fa-circle text-yellow-500 mr-1"></i> Menunggu
+              kamera...
+            </div>
+          </div>
 
-      <div id="resultContainer" class="mt-6">
-        <img id="resultImage" class="w-full rounded-lg shadow-md border" />
-        <ul
-          id="detectionsList"
-          class="mt-3 text-left list-disc list-inside text-gray-700"
-        ></ul>
+          <div class="mt-6">
+            <button
+              id="startButton"
+              class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold px-5 py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center justify-center"
+            >
+              <i class="fas fa-video mr-2"></i> 🎥 Nyalakan Kamera
+            </button>
+
+            <div class="mt-4 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+              <p class="font-medium mb-1">
+                <i class="fas fa-lightbulb mr-2 text-yellow-500"></i> Tips
+                penggunaan:
+              </p>
+              <ul class="list-disc pl-5 space-y-1">
+                <li>Pastikan cahaya cukup untuk hasil terbaik</li>
+                <li>Pastikan tangan terlihat jelas di kamera</li>
+                <li>Gunakan latar belakang yang tidak terlalu ramai</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hasil Deteksi -->
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800 flex items-center">
+              <i class="fas fa-brain mr-2 text-green-500"></i> Hasil Deteksi
+            </h2>
+            <div class="text-sm text-gray-500">
+              <i class="fas fa-sync-alt mr-1"></i> Realtime
+            </div>
+          </div>
+
+          <div
+            class="border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center h-64 md:h-80 bg-gray-50"
+            id="resultPlaceholder"
+          >
+            <div class="text-center">
+              <i class="fas fa-hands text-gray-300 text-5xl mb-3"></i>
+              <p class="text-gray-500 font-medium">
+                Hasil deteksi akan muncul di sini
+              </p>
+              <p class="text-gray-400 text-sm mt-1">
+                Setelah kamera dinyalakan
+              </p>
+            </div>
+          </div>
+
+          <div id="resultContainer" class="hidden">
+            <img
+              id="resultImage"
+              class="w-full h-64 md:h-80 object-cover rounded-xl shadow-md border border-gray-300"
+            />
+          </div>
+
+          <div class="mt-6">
+            <h3 class="font-bold text-gray-800 mb-3 flex items-center">
+              <i class="fas fa-list mr-2 text-purple-500"></i> Deteksi Terbaru
+            </h3>
+            <div class="bg-gray-50 rounded-xl p-4 max-h-40 overflow-y-auto">
+              <ul id="detectionsList" class="space-y-2">
+                <li class="text-gray-500 italic">Belum ada deteksi</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <button
-        id="startButton"
-        class="mt-4 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
-      >
-        🎥 Nyalakan Kamera
-      </button>
-    </div>
+      <!-- Card Contoh Bahasa Isyarat -->
+      <div class="mb-12">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+            <i class="fas fa-graduation-cap mr-3 text-blue-600"></i> Contoh
+            Bahasa Isyarat
+          </h2>
+          <p class="text-gray-600 text-sm hidden md:block">
+            Untuk panduan pengguna awam
+          </p>
+        </div>
 
-    <footer class="mt-6 text-sm text-gray-500">
-      Dibuat dengan 💙 oleh Faruqi Rabbani
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <!-- Card 1: A -->
+          <div class="card-hover bg-white rounded-xl shadow-lg p-4 text-center">
+            <div
+              class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
+            >
+              <span class="text-3xl font-bold text-blue-700">A</span>
+            </div>
+            <h3 class="font-bold text-gray-800 mb-1">Huruf A</h3>
+            <p class="text-sm text-gray-600">Kepalan tangan tertutup</p>
+            <div class="mt-3">
+              <i class="fas fa-hand-fist text-blue-500 text-xl"></i>
+            </div>
+          </div>
+
+          <!-- Card 2: B -->
+          <div class="card-hover bg-white rounded-xl shadow-lg p-4 text-center">
+            <div
+              class="bg-green-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
+            >
+              <span class="text-3xl font-bold text-green-700">B</span>
+            </div>
+            <h3 class="font-bold text-gray-800 mb-1">Huruf B</h3>
+            <p class="text-sm text-gray-600">Telapak tangan terbuka</p>
+            <div class="mt-3">
+              <i class="fas fa-hand text-green-500 text-xl"></i>
+            </div>
+          </div>
+
+          <!-- Card 3: C -->
+          <div class="card-hover bg-white rounded-xl shadow-lg p-4 text-center">
+            <div
+              class="bg-yellow-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
+            >
+              <span class="text-3xl font-bold text-yellow-700">C</span>
+            </div>
+            <h3 class="font-bold text-gray-800 mb-1">Huruf C</h3>
+            <p class="text-sm text-gray-600">Bentuk seperti huruf C</p>
+            <div class="mt-3">
+              <i class="fas fa-hand-peace text-yellow-500 text-xl"></i>
+            </div>
+          </div>
+
+          <!-- Card 4: I Love You -->
+          <div class="card-hover bg-white rounded-xl shadow-lg p-4 text-center">
+            <div
+              class="bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
+            >
+              <span class="text-xl font-bold text-red-700">ILY</span>
+            </div>
+            <h3 class="font-bold text-gray-800 mb-1">I Love You</h3>
+            <p class="text-sm text-gray-600">
+              Jari kelingking, jempol & telunjuk
+            </p>
+            <div class="mt-3">
+              <i class="fas fa-hand-spock text-red-500 text-xl"></i>
+            </div>
+          </div>
+
+          <!-- Card 5: 1 -->
+          <div class="card-hover bg-white rounded-xl shadow-lg p-4 text-center">
+            <div
+              class="bg-purple-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
+            >
+              <span class="text-3xl font-bold text-purple-700">1</span>
+            </div>
+            <h3 class="font-bold text-gray-800 mb-1">Angka 1</h3>
+            <p class="text-sm text-gray-600">Telunjuk mengacung</p>
+            <div class="mt-3">
+              <i class="fas fa-hand-point-up text-purple-500 text-xl"></i>
+            </div>
+          </div>
+
+          <!-- Card 6: 5 -->
+          <div class="card-hover bg-white rounded-xl shadow-lg p-4 text-center">
+            <div
+              class="bg-indigo-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
+            >
+              <span class="text-3xl font-bold text-indigo-700">5</span>
+            </div>
+            <h3 class="font-bold text-gray-800 mb-1">Angka 5</h3>
+            <p class="text-sm text-gray-600">Semua jari terbuka</p>
+            <div class="mt-3">
+              <i class="fas fa-hand-paper text-indigo-500 text-xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 text-center">
+          <p class="text-gray-600 text-sm">
+            <i class="fas fa-info-circle mr-1"></i> Arahkan tangan ke kamera
+            untuk mencoba deteksi. Sistem akan mengenali bentuk tangan secara
+            otomatis.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-8">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="mb-4 md:mb-0">
+            <div class="flex items-center">
+              <div class="bg-blue-500 p-2 rounded-full mr-3">
+                <i class="fas fa-hands text-white"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg">
+                  Deteksi Bahasa Isyarat Realtime
+                </h3>
+                <p class="text-gray-300 text-sm">
+                  Teknologi AI untuk komunikasi inklusif
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center md:text-right">
+            <p class="text-gray-300">
+              <i class="fas fa-heart text-red-400 mr-1"></i> Dibuat dengan
+              dedikasi oleh <span class="font-semibold">Faruqi Rabbani</span>
+            </p>
+            <p class="text-gray-400 text-sm mt-1">
+              © 2023 - Sistem Deteksi Tangan
+            </p>
+          </div>
+        </div>
+      </div>
     </footer>
+
+    <!-- Canvas tersembunyi untuk pemrosesan -->
+    <canvas id="canvas" class="hidden"></canvas>
 
     <script>
       const video = document.getElementById("video");
@@ -49,6 +306,9 @@
       const startButton = document.getElementById("startButton");
       const resultImage = document.getElementById("resultImage");
       const detectionsList = document.getElementById("detectionsList");
+      const resultContainer = document.getElementById("resultContainer");
+      const resultPlaceholder = document.getElementById("resultPlaceholder");
+      const statusOverlay = document.getElementById("statusOverlay");
 
       // 🔗 Ganti URL ngrok kamu di sini
       const API_URL = "https://simona-wraithlike-alicia.ngrok-free.dev/detect";
@@ -58,15 +318,33 @@
       startButton.onclick = async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
+            video: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: "user",
+            },
           });
+
           video.srcObject = stream;
           startButton.disabled = true;
-          startButton.textContent = "🧠 Deteksi sedang berjalan...";
+          startButton.innerHTML =
+            '<i class="fas fa-spinner fa-spin mr-2"></i> Deteksi sedang berjalan...';
+          startButton.classList.remove("from-blue-600", "to-blue-700");
+          startButton.classList.add("from-green-600", "to-green-700");
+
           isRunning = true;
+          statusOverlay.innerHTML =
+            '<i class="fas fa-circle text-green-500 mr-1"></i> Sedang mendeteksi...';
+          statusOverlay.style.background = "rgba(34, 197, 94, 0.8)";
+
+          // Tampilkan kontainer hasil
+          resultContainer.classList.remove("hidden");
+          resultPlaceholder.classList.add("hidden");
+
           startRealtimeDetection();
         } catch (err) {
           alert("Tidak dapat mengakses kamera: " + err);
+          console.error("Kamera error:", err);
         }
       };
 
@@ -74,6 +352,7 @@
       async function startRealtimeDetection() {
         const context = canvas.getContext("2d");
         let isProcessing = false;
+        let detectionCount = 0;
 
         async function detectFrame() {
           if (!isRunning || isProcessing)
@@ -83,7 +362,9 @@
           canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
           context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const imageData = canvas.toDataURL("image/jpeg", 0.5); // compress agar lebih cepat
+
+          // Kompres gambar untuk transfer lebih cepat
+          const imageData = canvas.toDataURL("image/jpeg", 0.7);
 
           try {
             const response = await fetch(API_URL, {
@@ -94,26 +375,67 @@
 
             const result = await response.json();
             if (!result.error) {
+              // Tampilkan gambar hasil
               resultImage.src = result.image;
+
+              // Update daftar deteksi
               detectionsList.innerHTML = "";
 
-              if (result.detections.length === 0) {
-                detectionsList.innerHTML = "<li>Tidak ada deteksi.</li>";
-              } else {
+              if (result.detections && result.detections.length === 0) {
+                const li = document.createElement("li");
+                li.className = "text-gray-500 italic";
+                li.textContent = "Tidak ada deteksi. Coba ubah posisi tangan.";
+                detectionsList.appendChild(li);
+              } else if (result.detections) {
                 result.detections.forEach((det) => {
+                  detectionCount++;
                   const li = document.createElement("li");
-                  li.textContent = `${det.label} (${(
-                    det.confidence * 100
-                  ).toFixed(1)}%)`;
-                  detectionsList.appendChild(li);
+                  li.className =
+                    "bg-white p-3 rounded-lg shadow-sm border-l-4 border-blue-500";
+
+                  const confidencePercent = (det.confidence * 100).toFixed(1);
+                  let confidenceColor = "text-green-600";
+                  if (confidencePercent < 70)
+                    confidenceColor = "text-yellow-600";
+                  if (confidencePercent < 50) confidenceColor = "text-red-600";
+
+                  li.innerHTML = `
+                    <div class="flex justify-between items-center">
+                      <div>
+                        <span class="font-bold text-gray-800">${det.label}</span>
+                        <span class="text-xs ${confidenceColor} font-semibold ml-2">${confidencePercent}%</span>
+                      </div>
+                      <span class="text-xs text-gray-500">#${detectionCount}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                      <div class="bg-blue-600 h-1.5 rounded-full" style="width: ${confidencePercent}%"></div>
+                    </div>
+                  `;
+                  detectionsList.prepend(li); // Tambahkan di awal
                 });
+
+                // Batasi jumlah item yang ditampilkan
+                if (detectionsList.children.length > 5) {
+                  detectionsList.removeChild(detectionsList.lastChild);
+                }
+
+                // Update status overlay
+                const topDetection = result.detections[0];
+                if (topDetection) {
+                  statusOverlay.innerHTML = `<i class="fas fa-circle text-green-500 mr-1"></i> Terdeteksi: ${
+                    topDetection.label
+                  } (${(topDetection.confidence * 100).toFixed(0)}%)`;
+                }
               }
             }
           } catch (err) {
             console.error("Gagal deteksi:", err);
+            statusOverlay.innerHTML =
+              '<i class="fas fa-circle text-red-500 mr-1"></i> Gagal terhubung ke server';
+            statusOverlay.style.background = "rgba(239, 68, 68, 0.8)";
           } finally {
             isProcessing = false;
-            requestAnimationFrame(detectFrame); // panggil frame berikutnya secepatnya
+            requestAnimationFrame(detectFrame);
           }
         }
 

@@ -48,7 +48,13 @@
         >
           🎥 Nyalakan Kamera
         </button>
-
+        <button
+          id="stopButton"
+          class="mt-4 ml-2 bg-yellow-600 text-white px-5 py-2 rounded-lg hover:bg-yellow-700 transition"
+          disabled
+        >
+          ⏹️ Hentikan Deteksi
+        </button>
         <button
           id="clearButton"
           class="mt-4 ml-2 bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition"
@@ -80,6 +86,8 @@
       const resultImage = document.getElementById("resultImage");
       const detectionsList = document.getElementById("detectionsList");
       const historyContainer = document.getElementById("historyContainer");
+      const stopButton = document.getElementById("stopButton");
+      let stream = null;
 
       // 🔗 Ganti URL ngrok kamu di sini
       const API_URL = "https://simona-wraithlike-alicia.ngrok-free.dev/detect";
@@ -90,19 +98,59 @@
 
       let isRunning = false;
 
+      //   startButton.onclick = async () => {
+      //     try {
+      //       const stream = await navigator.mediaDevices.getUserMedia({
+      //         video: true,
+      //       });
+      //       video.srcObject = stream;
+      //       startButton.disabled = true;
+      //       startButton.textContent = "🧠 Deteksi sedang berjalan...";
+      //       isRunning = true;
+      //       startRealtimeDetection();
+      //     } catch (err) {
+      //       alert("Tidak dapat mengakses kamera: " + err);
+      //     }
+      //   };
+
       startButton.onclick = async () => {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({
+          stream = await navigator.mediaDevices.getUserMedia({
             video: true,
           });
           video.srcObject = stream;
+
           startButton.disabled = true;
+          stopButton.disabled = false;
+
           startButton.textContent = "🧠 Deteksi sedang berjalan...";
           isRunning = true;
+
           startRealtimeDetection();
         } catch (err) {
           alert("Tidak dapat mengakses kamera: " + err);
         }
+      };
+
+      stopButton.onclick = () => {
+        isRunning = false;
+
+        // Matikan kamera
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+          stream = null;
+        }
+
+        video.srcObject = null;
+        resultImage.src = "";
+        detectionsList.innerHTML = "";
+
+        startButton.disabled = false;
+        stopButton.disabled = true;
+
+        startButton.textContent = "🎥 Nyalakan Kamera";
+
+        alert("Deteksi berhasil dihentikan.");
       };
 
       clearButton.onclick = async () => {

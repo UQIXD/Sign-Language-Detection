@@ -226,7 +226,8 @@
         try {
           const response = await fetch(HISTORY_URL);
           const result = await response.json();
-          if (result.history_table && result.total_classes > 0) {
+          // Pastikan mengambil 'history_table' sesuai perubahan di Python tadi
+          if (result.history_table) {
             historyContainer.innerHTML = result.history_table;
           }
         } catch (err) {

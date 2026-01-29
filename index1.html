@@ -79,160 +79,175 @@
     </footer>
 
     <script>
-      const video = document.getElementById("video");
-      const canvas = document.getElementById("canvas");
-      const startButton = document.getElementById("startButton");
-      const clearButton = document.getElementById("clearButton");
-      const resultImage = document.getElementById("resultImage");
-      const detectionsList = document.getElementById("detectionsList");
-      const historyContainer = document.getElementById("historyContainer");
-      const stopButton = document.getElementById("stopButton");
-      let stream = null;
+          const video = document.getElementById("video");
+          const canvas = document.getElementById("canvas");
+          const startButton = document.getElementById("startButton");
+          const clearButton = document.getElementById("clearButton");
+          const resultImage = document.getElementById("resultImage");
+          const detectionsList = document.getElementById("detectionsList");
+          const historyContainer = document.getElementById("historyContainer");
+          const stopButton = document.getElementById("stopButton");
+          let stream = null;
 
-      // 🔗 Ganti URL ngrok kamu di sini
-      const API_URL = "https://simona-wraithlike-alicia.ngrok-free.dev/detect";
-      const HISTORY_URL =
-        "https://simona-wraithlike-alicia.ngrok-free.dev/history";
-      const CLEAR_URL =
-        "https://simona-wraithlike-alicia.ngrok-free.dev/clear-history";
+          // 🔗 Ganti URL ngrok kamu di sini
+          const API_URL = "https://simona-wraithlike-alicia.ngrok-free.dev/detect";
+          const HISTORY_URL =
+            "https://simona-wraithlike-alicia.ngrok-free.dev/history";
+          const CLEAR_URL =
+            "https://simona-wraithlike-alicia.ngrok-free.dev/clear-history";
 
-      let isRunning = false;
+          let isRunning = false;
 
-      //   startButton.onclick = async () => {
-      //     try {
-      //       const stream = await navigator.mediaDevices.getUserMedia({
-      //         video: true,
-      //       });
-      //       video.srcObject = stream;
-      //       startButton.disabled = true;
-      //       startButton.textContent = "🧠 Deteksi sedang berjalan...";
-      //       isRunning = true;
-      //       startRealtimeDetection();
-      //     } catch (err) {
-      //       alert("Tidak dapat mengakses kamera: " + err);
-      //     }
-      //   };
+          //   startButton.onclick = async () => {
+          //     try {
+          //       const stream = await navigator.mediaDevices.getUserMedia({
+          //         video: true,
+          //       });
+          //       video.srcObject = stream;
+          //       startButton.disabled = true;
+          //       startButton.textContent = "🧠 Deteksi sedang berjalan...";
+          //       isRunning = true;
+          //       startRealtimeDetection();
+          //     } catch (err) {
+          //       alert("Tidak dapat mengakses kamera: " + err);
+          //     }
+          //   };
 
-      startButton.onclick = async () => {
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-          });
-          video.srcObject = stream;
+          startButton.onclick = async () => {
+            try {
+              stream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+              });
+              video.srcObject = stream;
 
-          startButton.disabled = true;
-          stopButton.disabled = false;
+              startButton.disabled = true;
+              stopButton.disabled = false;
 
-          startButton.textContent = "🧠 Deteksi sedang berjalan...";
-          isRunning = true;
+              startButton.textContent = "🧠 Deteksi sedang berjalan...";
+              isRunning = true;
 
-          startRealtimeDetection();
-        } catch (err) {
-          alert("Tidak dapat mengakses kamera: " + err);
-        }
-      };
+              startRealtimeDetection();
+            } catch (err) {
+              alert("Tidak dapat mengakses kamera: " + err);
+            }
+          };
 
-      stopButton.onclick = () => {
-        isRunning = false;
+          stopButton.onclick = () => {
+            isRunning = false;
 
-        // Matikan kamera
-        if (stream) {
-          stream.getTracks().forEach((track) => track.stop());
-          stream = null;
-        }
+            // Matikan kamera
+            if (stream) {
+              stream.getTracks().forEach((track) => track.stop());
+              stream = null;
+            }
 
-        video.srcObject = null;
-        resultImage.src = "";
-        detectionsList.innerHTML = "";
+            video.srcObject = null;
+            resultImage.src = "";
+            detectionsList.innerHTML = "";
 
-        startButton.disabled = false;
-        stopButton.disabled = true;
+            startButton.disabled = false;
+            stopButton.disabled = true;
 
-        startButton.textContent = "🎥 Nyalakan Kamera";
+            startButton.textContent = "🎥 Nyalakan Kamera";
 
-        alert("Deteksi berhasil dihentikan.");
-      };
+            alert("Deteksi berhasil dihentikan.");
+          };
 
-      clearButton.onclick = async () => {
-        if (confirm("Yakin ingin menghapus semua history?")) {
-          try {
-            await fetch(CLEAR_URL, { method: "POST" });
-            historyContainer.innerHTML =
-              "<p class='text-center text-gray-500'>Belum ada riwayat deteksi</p>";
-            alert("History berhasil dihapus!");
-          } catch (err) {
-            alert("Gagal menghapus history: " + err);
-          }
-        }
-      };
-
-      // === Fungsi deteksi realtime ===
-      async function startRealtimeDetection() {
-        const context = canvas.getContext("2d");
-        let isProcessing = false;
-
-        async function detectFrame() {
-          if (!isRunning || isProcessing)
-            return requestAnimationFrame(detectFrame);
-          isProcessing = true;
-
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const imageData = canvas.toDataURL("image/jpeg", 0.5);
-
-          try {
-            const response = await fetch(API_URL, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ image: imageData }),
-            });
-
-            const result = await response.json();
-            if (!result.error) {
-              resultImage.src = result.image;
-              detectionsList.innerHTML = "";
-
-              if (result.detections.length === 0) {
-                detectionsList.innerHTML = "<li>Tidak ada deteksi.</li>";
-
-                // Tampilkan history table jika tidak ada deteksi
-                if (result.history_table) {
-                  historyContainer.innerHTML = result.history_table;
-                }
-              } else {
-                result.detections.forEach((det) => {
-                  const li = document.createElement("li");
-                  li.textContent = `${det.label} (${(
-                    det.confidence * 100
-                  ).toFixed(1)}%)`;
-                  detectionsList.appendChild(li);
-                });
+          clearButton.onclick = async () => {
+            if (confirm("Yakin ingin menghapus semua history?")) {
+              try {
+                await fetch(CLEAR_URL, { method: "POST" });
+                historyContainer.innerHTML =
+                  "<p class='text-center text-gray-500'>Belum ada riwayat deteksi</p>";
+                alert("History berhasil dihapus!");
+              } catch (err) {
+                alert("Gagal menghapus history: " + err);
               }
             }
-          } catch (err) {
-            console.error("Gagal deteksi:", err);
-          } finally {
-            isProcessing = false;
-            requestAnimationFrame(detectFrame);
+          };
+
+          // === Fungsi deteksi realtime ===
+          async function startRealtimeDetection() {
+            const context = canvas.getContext("2d");
+            let isProcessing = false;
+
+            async function detectFrame() {
+              if (!isRunning || isProcessing)
+                return requestAnimationFrame(detectFrame);
+              isProcessing = true;
+
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              context.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const imageData = canvas.toDataURL("image/jpeg", 0.5);
+
+              try {
+                const response = await fetch(API_URL, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ image: imageData }),
+                });
+
+                const result = await response.json();
+                if (!result.error) {
+                  resultImage.src = result.image;
+                  detectionsList.innerHTML = "";
+
+                  if (result.detections.length === 0) {
+                    detectionsList.innerHTML = "<li>Tidak ada deteksi.</li>";
+
+                    // Tampilkan history table jika tidak ada deteksi
+                    if (result.history_table) {
+                      historyContainer.innerHTML = result.history_table;
+                    }
+                  } else {
+                    result.detections.forEach((det) => {
+                      const li = document.createElement("li");
+                      li.textContent = `${det.label} (${(
+                        det.confidence * 100
+                      ).toFixed(1)}%)`;
+                      detectionsList.appendChild(li);
+                    });
+                  }
+                }
+              } catch (err) {
+                console.error("Gagal deteksi:", err);
+              } finally {
+                isProcessing = false;
+                requestAnimationFrame(detectFrame);
+              }
+            }
+
+            detectFrame();
           }
-        }
 
-        detectFrame();
-      }
-
-      // Update history setiap 2 detik (opsional)
+          // Update history setiap 2 detik (opsional)
+          // Perbaiki fetch di setInterval (History)
       setInterval(async () => {
-        try {
-          const response = await fetch(HISTORY_URL);
-          const result = await response.json();
-          if (result.history_table && result.total_classes > 0) {
-            historyContainer.innerHTML = result.history_table;
+          try {
+              const response = await fetch(HISTORY_URL, {
+                  headers: {
+                      "ngrok-skip-browser-warning": "true" // TAMBAHKAN INI
+                  }
+              });
+              const result = await response.json();
+              if (result.history_table) {
+                  historyContainer.innerHTML = result.history_table;
+              }
+          } catch (err) {
+              console.error("Gagal update history:", err);
           }
-        } catch (err) {
-          console.error("Gagal update history:", err);
-        }
       }, 2000);
+
+      // Perbaiki juga fetch di fungsi startRealtimeDetection (Detect)
+      const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "true" // TAMBAHKAN INI JUGA
+          },
+          body: JSON.stringify({ image: imageData }),
+      });
     </script>
   </body>
 </html>

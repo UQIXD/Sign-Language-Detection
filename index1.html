@@ -5,15 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Realtime Deteksi Bahasa Isyarat</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      .history-container {
-        max-height: 400px;
-        overflow-y: auto;
-      }
-      table {
-        font-size: 14px;
-      }
-    </style>
   </head>
   <body
     class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4"
@@ -22,54 +13,54 @@
       🤟 Deteksi Bahasa Isyarat Realtime
     </h1>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-6xl">
-      <!-- Kolom Kiri: Video & Deteksi -->
-      <div class="bg-white shadow-xl rounded-2xl p-6 text-center">
-        <video
-          id="video"
-          autoplay
-          playsinline
-          class="rounded-xl w-full h-64 object-cover border-2 border-gray-300"
-        ></video>
+    <div class="bg-white shadow-xl rounded-2xl p-6 w-full max-w-4xl">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Kamera & Hasil Deteksi -->
+        <div class="text-center">
+          <video
+            id="video"
+            autoplay
+            playsinline
+            class="rounded-xl w-full h-64 object-cover border-2 border-gray-300"
+          ></video>
 
-        <canvas id="canvas" class="hidden"></canvas>
+          <canvas id="canvas" class="hidden"></canvas>
 
-        <div id="resultContainer" class="mt-6">
-          <img id="resultImage" class="w-full rounded-lg shadow-md border" />
-          <ul
-            id="detectionsList"
-            class="mt-3 text-left list-disc list-inside text-gray-700"
-          ></ul>
+          <div id="resultContainer" class="mt-4">
+            <img id="resultImage" class="w-full rounded-lg shadow-md border" />
+            <ul
+              id="detectionsList"
+              class="mt-3 text-left list-disc list-inside text-gray-700 text-sm"
+            ></ul>
+          </div>
+
+          <button
+            id="startButton"
+            class="mt-4 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition w-full"
+          >
+            🎥 Nyalakan Kamera
+          </button>
         </div>
 
-        <button
-          id="startButton"
-          class="mt-4 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          🎥 Nyalakan Kamera
-        </button>
-        <button
-          id="stopButton"
-          class="mt-4 ml-2 bg-yellow-600 text-white px-5 py-2 rounded-lg hover:bg-yellow-700 transition"
-          disabled
-        >
-          ⏹️ Hentikan Deteksi
-        </button>
-        <button
-          id="clearButton"
-          class="mt-4 ml-2 bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition"
-        >
-          🗑️ Hapus History
-        </button>
-      </div>
+        <!-- History Panel -->
+        <div>
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-xl font-bold text-gray-800">
+              📊 Top 5 Deteksi per Class
+            </h2>
+            <button
+              id="clearButton"
+              class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition"
+            >
+              🗑️ Hapus History
+            </button>
+          </div>
 
-      <!-- Kolom Kanan: History Table -->
-      <div class="bg-white shadow-xl rounded-2xl p-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">
-          📊 History Top 5 Deteksi
-        </h2>
-        <div id="historyContainer" class="history-container">
-          <p class="text-center text-gray-500">Belum ada riwayat deteksi</p>
+          <div id="historyContainer" class="space-y-3 overflow-y-auto max-h-96">
+            <p class="text-gray-500 text-sm">
+              Mulai deteksi untuk melihat history...
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -82,91 +73,133 @@
       const video = document.getElementById("video");
       const canvas = document.getElementById("canvas");
       const startButton = document.getElementById("startButton");
-      const clearButton = document.getElementById("clearButton");
       const resultImage = document.getElementById("resultImage");
       const detectionsList = document.getElementById("detectionsList");
       const historyContainer = document.getElementById("historyContainer");
-      const stopButton = document.getElementById("stopButton");
-      let stream = null;
+      const clearButton = document.getElementById("clearButton");
 
-      // 🔗 Ganti URL ngrok kamu di sini
       const API_URL = "https://simona-wraithlike-alicia.ngrok-free.dev/detect";
-      const HISTORY_URL =
-        "https://simona-wraithlike-alicia.ngrok-free.dev/history";
-      const CLEAR_URL =
-        "https://simona-wraithlike-alicia.ngrok-free.dev/clear-history";
 
       let isRunning = false;
+      let historyData = {}; // Format: { "A": [{conf: 0.95, timestamp: ...}, ...], "B": [...] }
 
-      //   startButton.onclick = async () => {
-      //     try {
-      //       const stream = await navigator.mediaDevices.getUserMedia({
-      //         video: true,
-      //       });
-      //       video.srcObject = stream;
-      //       startButton.disabled = true;
-      //       startButton.textContent = "🧠 Deteksi sedang berjalan...";
-      //       isRunning = true;
-      //       startRealtimeDetection();
-      //     } catch (err) {
-      //       alert("Tidak dapat mengakses kamera: " + err);
-      //     }
-      //   };
+      // Load history dari storage saat halaman dimuat
+      async function loadHistory() {
+        try {
+          const result = await window.storage.get("asl-detection-history");
+          if (result && result.value) {
+            historyData = JSON.parse(result.value);
+            renderHistory();
+          }
+        } catch (err) {
+          console.log("No existing history found");
+        }
+      }
 
+      // Simpan history ke storage
+      async function saveHistory() {
+        try {
+          await window.storage.set(
+            "asl-detection-history",
+            JSON.stringify(historyData),
+          );
+        } catch (err) {
+          console.error("Failed to save history:", err);
+        }
+      }
+
+      // Tambah deteksi ke history
+      function addToHistory(label, confidence) {
+        if (!historyData[label]) {
+          historyData[label] = [];
+        }
+
+        // Tambah deteksi baru
+        historyData[label].push({
+          conf: confidence,
+          timestamp: new Date().toLocaleString("id-ID"),
+        });
+
+        // Sort berdasarkan confidence tertinggi
+        historyData[label].sort((a, b) => b.conf - a.conf);
+
+        // Simpan hanya top 5
+        if (historyData[label].length > 5) {
+          historyData[label] = historyData[label].slice(0, 5);
+        }
+
+        saveHistory();
+        renderHistory();
+      }
+
+      // Render history ke UI
+      function renderHistory() {
+        if (Object.keys(historyData).length === 0) {
+          historyContainer.innerHTML =
+            '<p class="text-gray-500 text-sm">Belum ada history deteksi.</p>';
+          return;
+        }
+
+        let html = "";
+        const sortedClasses = Object.keys(historyData).sort();
+
+        sortedClasses.forEach((className) => {
+          const detections = historyData[className];
+          html += `
+            <div class="border rounded-lg p-3 bg-gray-50">
+              <h3 class="font-bold text-lg text-blue-600 mb-2">Class: ${className}</h3>
+              <div class="space-y-1">
+          `;
+
+          detections.forEach((det, idx) => {
+            html += `
+              <div class="flex justify-between items-center text-sm bg-white p-2 rounded">
+                <span class="font-semibold">#${idx + 1}</span>
+                <span class="text-green-600 font-bold">${(det.conf * 100).toFixed(1)}%</span>
+                <span class="text-gray-500 text-xs">${det.timestamp}</span>
+              </div>
+            `;
+          });
+
+          html += `
+              </div>
+            </div>
+          `;
+        });
+
+        historyContainer.innerHTML = html;
+      }
+
+      // Hapus history
+      clearButton.onclick = async () => {
+        if (confirm("Yakin ingin menghapus semua history?")) {
+          historyData = {};
+          try {
+            await window.storage.delete("asl-detection-history");
+          } catch (err) {
+            console.error("Failed to delete history:", err);
+          }
+          renderHistory();
+        }
+      };
+
+      // Start camera
       startButton.onclick = async () => {
         try {
-          stream = await navigator.mediaDevices.getUserMedia({
+          const stream = await navigator.mediaDevices.getUserMedia({
             video: true,
           });
           video.srcObject = stream;
-
           startButton.disabled = true;
-          stopButton.disabled = false;
-
           startButton.textContent = "🧠 Deteksi sedang berjalan...";
           isRunning = true;
-
           startRealtimeDetection();
         } catch (err) {
           alert("Tidak dapat mengakses kamera: " + err);
         }
       };
 
-      stopButton.onclick = () => {
-        isRunning = false;
-
-        // Matikan kamera
-        if (stream) {
-          stream.getTracks().forEach((track) => track.stop());
-          stream = null;
-        }
-
-        video.srcObject = null;
-        resultImage.src = "";
-        detectionsList.innerHTML = "";
-
-        startButton.disabled = false;
-        stopButton.disabled = true;
-
-        startButton.textContent = "🎥 Nyalakan Kamera";
-
-        alert("Deteksi berhasil dihentikan.");
-      };
-
-      clearButton.onclick = async () => {
-        if (confirm("Yakin ingin menghapus semua history?")) {
-          try {
-            await fetch(CLEAR_URL, { method: "POST" });
-            historyContainer.innerHTML =
-              "<p class='text-center text-gray-500'>Belum ada riwayat deteksi</p>";
-            alert("History berhasil dihapus!");
-          } catch (err) {
-            alert("Gagal menghapus history: " + err);
-          }
-        }
-      };
-
-      // === Fungsi deteksi realtime ===
+      // Realtime detection
       async function startRealtimeDetection() {
         const context = canvas.getContext("2d");
         let isProcessing = false;
@@ -189,25 +222,29 @@
             });
 
             const result = await response.json();
-            if (!result.error) {
+            if (!result.error && result.image) {
               resultImage.src = result.image;
+
+              // Update detection list dan history
               detectionsList.innerHTML = "";
 
-              if (result.detections.length === 0) {
-                detectionsList.innerHTML = "<li>Tidak ada deteksi.</li>";
+              // Parse deteksi dari response
+              // Karena backend tidak mengirim array detections, kita perlu modifikasi
+              // atau menganggap ada deteksi jika gambar berubah
+              // Untuk demo, kita bisa menambahkan deteksi manual atau mengubah backend
 
-                // Tampilkan history table jika tidak ada deteksi
-                if (result.history_table) {
-                  historyContainer.innerHTML = result.history_table;
-                }
-              } else {
+              // Contoh jika backend mengirim detections array:
+              if (result.detections && result.detections.length > 0) {
                 result.detections.forEach((det) => {
                   const li = document.createElement("li");
-                  li.textContent = `${det.label} (${(
-                    det.confidence * 100
-                  ).toFixed(1)}%)`;
+                  li.textContent = `${det.label} (${(det.confidence * 100).toFixed(1)}%)`;
                   detectionsList.appendChild(li);
+
+                  // Tambah ke history
+                  addToHistory(det.label, det.confidence);
                 });
+              } else {
+                detectionsList.innerHTML = "<li>Tidak ada deteksi.</li>";
               }
             }
           } catch (err) {
@@ -221,19 +258,8 @@
         detectFrame();
       }
 
-      // Update history setiap 2 detik (opsional)
-      setInterval(async () => {
-        try {
-          const response = await fetch(HISTORY_URL);
-          const result = await response.json();
-          // Pastikan mengambil 'history_table' sesuai perubahan di Python tadi
-          if (result.history_table) {
-            historyContainer.innerHTML = result.history_table;
-          }
-        } catch (err) {
-          console.error("Gagal update history:", err);
-        }
-      }, 2000);
+      // Load history saat halaman dimuat
+      loadHistory();
     </script>
   </body>
 </html>

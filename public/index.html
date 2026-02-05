@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Realtime Deteksi Bahasa Isyarat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+      };
+    </script>
+    <style>
+      @keyframes pulse-border {
+        0%,
+        100% {
+          border-color: #3b82f6;
+        }
+        50% {
+          border-color: #8b5cf6;
+        }
+      }
+      .pulse-border {
+        animation: pulse-border 2s ease-in-out infinite;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .fade-in {
+        animation: fadeIn 0.5s ease-out;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen transition-colors duration-300"
+  >
+    <!-- Header -->
+    <header
+      class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg sticky top-0 z-50 transition-colors duration-300"
+    >
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <span class="text-4xl">🤟</span>
+            <h1
+              class="text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+            >
+              Deteksi Bahasa Isyarat Realtime
+            </h1>
+          </div>
+
+          <!-- Dark Mode Toggle -->
+          <button
+            id="themeToggle"
+            class="p-3 rounded-xl bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all transform hover:scale-110 shadow-lg"
+            title="Toggle Dark Mode"
+          >
+            <svg
+              id="sunIcon"
+              class="w-6 h-6 text-yellow-500"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            <svg
+              id="moonIcon"
+              class="w-6 h-6 text-purple-600 hidden"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+      <!-- Grid Layout: Video (Kiri) dan Result (Kanan) -->
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <!-- Video Section (Kiri) -->
+        <div
+          class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-6 fade-in transition-colors duration-300"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h2
+              class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white flex items-center space-x-2"
+            >
+              <span>📹</span>
+              <span>Kamera Live</span>
+            </h2>
+            <div
+              class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1 hidden"
+              id="liveIndicator"
+            >
+              <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+              <span>LIVE</span>
+            </div>
+          </div>
+
+          <div
+            class="relative aspect-video bg-gray-900 rounded-2xl overflow-hidden border-4 pulse-border"
+          >
+            <video
+              id="video"
+              autoplay
+              playsinline
+              class="w-full h-full object-contain"
+            ></video>
+          </div>
+
+          <canvas id="canvas" class="hidden"></canvas>
+
+          <div class="flex gap-3 mt-4">
+            <button
+              id="startButton"
+              class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
+            >
+              <span class="text-xl">🎥</span>
+              <span>Nyalakan Kamera</span>
+            </button>
+
+            <button
+              id="stopButton"
+              class="hidden flex-1 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
+            >
+              <span class="text-xl">⏹️</span>
+              <span>Hentikan</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Result Section (Kanan) -->
+        <div
+          class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-6 fade-in transition-colors duration-300"
+        >
+          <h2
+            class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center space-x-2"
+          >
+            <span>🎯</span>
+            <span>Hasil Deteksi</span>
+          </h2>
+
+          <div id="resultContainer" class="space-y-4">
+            <div
+              class="relative aspect-video bg-gray-100 dark:bg-gray-700 rounded-2xl overflow-hidden flex items-center justify-center border-4 border-gray-300 dark:border-gray-600 transition-colors duration-300"
+            >
+              <img
+                id="resultImage"
+                class="w-full h-full object-contain hidden"
+              />
+              <div
+                id="placeholder"
+                class="text-center text-gray-400 dark:text-gray-500"
+              >
+                <span class="text-5xl mb-2 block">👁️</span>
+                <p class="text-sm md:text-base">
+                  Hasil deteksi akan muncul di sini
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-4 transition-colors duration-300"
+            >
+              <h3
+                class="font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center space-x-2"
+              >
+                <span>📊</span>
+                <span>Deteksi Ditemukan:</span>
+              </h3>
+              <ul
+                id="detectionsList"
+                class="space-y-2 text-gray-700 dark:text-gray-300 max-h-32 overflow-y-auto"
+              >
+                <li class="text-sm text-gray-500 dark:text-gray-400 italic">
+                  Belum ada deteksi
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gallery Section -->
+      <div
+        class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-6 md:p-8 fade-in transition-colors duration-300"
+      >
+        <div class="text-center mb-6">
+          <h2
+            class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-2 flex items-center justify-center space-x-2"
+          >
+            <span>📚</span>
+            <span>Panduan Bahasa Isyarat</span>
+          </h2>
+          <p class="text-gray-600 dark:text-gray-300 text-sm md:text-base">
+            Pelajari huruf-huruf dalam bahasa isyarat untuk pemula
+          </p>
+        </div>
+
+        <div
+          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4"
+        >
+          <!-- Contoh Bahasa Isyarat A-Z -->
+          <div
+            class="bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer shadow-md"
+          >
+            <div class="text-4xl md:text-5xl mb-2">👆</div>
+            <p class="font-bold text-blue-800 text-lg">A</p>
+            <p class="text-xs text-blue-600 mt-1">
+              Jari mengepal, ibu jari di samping
+            </p>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer shadow-md"
+          >
+            <div class="text-4xl md:text-5xl mb-2">🤚</div>
+            <p class="font-bold text-purple-800 text-lg">B</p>
+            <p class="text-xs text-purple-600 mt-1">
+              Telapak terbuka, ibu jari melipat
+            </p>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer shadow-md"
+          >
+            <div class="text-4xl md:text-5xl mb-2">👌</div>
+            <p class="font-bold text-pink-800 text-lg">C</p>
+            <p class="text-xs text-pink-600 mt-1">
+              Bentuk huruf C dengan tangan
+            </p>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-green-100 to-green-200 rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer shadow-md"
+          >
+            <div class="text-4xl md:text-5xl mb-2">☝️</div>
+            <p class="font-bold text-green-800 text-lg">D</p>
+            <p class="text-xs text-green-600 mt-1">
+              Telunjuk tegak, jari lain melipat
+            </p>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer shadow-md"
+          >
+            <div class="text-4xl md:text-5xl mb-2">✊</div>
+            <p class="font-bold text-yellow-800 text-lg">E</p>
+            <p class="text-xs text-yellow-600 mt-1">Semua jari mengepal</p>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-red-100 to-red-200 rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer shadow-md"
+          >
+            <div class="text-4xl md:text-5xl mb-2">🤏</div>
+            <p class="font-bold text-red-800 text-lg">F</p>
+            <p class="text-xs text-red-600 mt-1">
+              Ibu jari & telunjuk menyentuh
+            </p>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer shadow-md"
+          >
+            <div class="text-4xl md:text-5xl mb-2">👈</div>
+            <p class="font-bold text-indigo-800 text-lg">G</p>
+            <p class="text-xs text-indigo-600 mt-1">
+              Telunjuk menunjuk samping
+            </p>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-teal-100 to-teal-200 rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer shadow-md"
+          >
+            <div class="text-4xl md:text-5xl mb-2">✌️</div>
+            <p class="font-bold text-teal-800 text-lg">H</p>
+            <p class="text-xs text-teal-600 mt-1">Dua jari menyamping</p>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer shadow-md"
+          >
+            <div class="text-4xl md:text-5xl mb-2">🤙</div>
+            <p class="font-bold text-orange-800 text-lg">I</p>
+            <p class="text-xs text-orange-600 mt-1">Kelingking tegak</p>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer shadow-md"
+          >
+            <div class="text-4xl md:text-5xl mb-2">🤟</div>
+            <p class="font-bold text-cyan-800 text-lg">J</p>
+            <p class="text-xs text-cyan-600 mt-1">
+              Kelingking dengan gerakan J
+            </p>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-lime-100 to-lime-200 rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer shadow-md"
+          >
+            <div class="text-4xl md:text-5xl mb-2">✌️</div>
+            <p class="font-bold text-lime-800 text-lg">K</p>
+            <p class="text-xs text-lime-600 mt-1">Telunjuk & tengah bentuk V</p>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-rose-100 to-rose-200 rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer shadow-md"
+          >
+            <div class="text-4xl md:text-5xl mb-2">👍</div>
+            <p class="font-bold text-rose-800 text-lg">L</p>
+            <p class="text-xs text-rose-600 mt-1">Bentuk huruf L dengan jari</p>
+          </div>
+        </div>
+
+        <div
+          class="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-4 text-center transition-colors duration-300"
+        >
+          <p class="text-sm md:text-base text-gray-700 dark:text-gray-200">
+            💡 <strong>Tips:</strong> Praktikkan gerakan tangan di depan kamera
+            untuk mendeteksi bahasa isyarat secara realtime!
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer
+      class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md mt-12 py-6 transition-colors duration-300"
+    >
+      <div class="container mx-auto px-4 text-center">
+        <p class="text-gray-600 dark:text-gray-300 text-sm md:text-base">
+          Dibuat dengan <span class="text-red-500">💙</span> oleh
+          <strong class="text-blue-600 dark:text-blue-400"
+            >Faruqi Rabbani</strong
+          >
+        </p>
+        <p class="text-gray-500 dark:text-gray-400 text-xs mt-2">
+          © 2025 - Deteksi Bahasa Isyarat Realtime
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+      const startButton = document.getElementById("startButton");
+      const stopButton = document.getElementById("stopButton");
+      const resultImage = document.getElementById("resultImage");
+      const detectionsList = document.getElementById("detectionsList");
+      const liveIndicator = document.getElementById("liveIndicator");
+      const placeholder = document.getElementById("placeholder");
+      const themeToggle = document.getElementById("themeToggle");
+      const sunIcon = document.getElementById("sunIcon");
+      const moonIcon = document.getElementById("moonIcon");
+
+      // 🔗 Ganti URL ngrok kamu di sini
+      const API_URL = "https://simona-wraithlike-alicia.ngrok-free.dev/detect";
+
+      let isRunning = false;
+      let stream = null;
+
+      // === Dark Mode Toggle ===
+      const theme = localStorage.getItem("theme") || "light";
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+        sunIcon.classList.add("hidden");
+        moonIcon.classList.remove("hidden");
+      }
+
+      themeToggle.onclick = () => {
+        document.documentElement.classList.toggle("dark");
+        sunIcon.classList.toggle("hidden");
+        moonIcon.classList.toggle("hidden");
+
+        const currentTheme = document.documentElement.classList.contains("dark")
+          ? "dark"
+          : "light";
+        localStorage.setItem("theme", currentTheme);
+      };
+
+      // === Start Camera ===
+      startButton.onclick = async () => {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          video.srcObject = stream;
+          startButton.classList.add("hidden");
+          stopButton.classList.remove("hidden");
+          liveIndicator.classList.remove("hidden");
+          isRunning = true;
+          startRealtimeDetection();
+        } catch (err) {
+          alert("Tidak dapat mengakses kamera: " + err);
+        }
+      };
+
+      // === Stop Detection ===
+      stopButton.onclick = () => {
+        isRunning = false;
+
+        // Stop camera stream
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+          stream = null;
+        }
+
+        video.srcObject = null;
+        startButton.classList.remove("hidden");
+        stopButton.classList.add("hidden");
+        liveIndicator.classList.add("hidden");
+
+        // Reset results
+        resultImage.classList.add("hidden");
+        resultImage.src = "";
+        placeholder.classList.remove("hidden");
+        detectionsList.innerHTML =
+          '<li class="text-sm text-gray-500 dark:text-gray-400 italic">Belum ada deteksi</li>';
+      };
+
+      // === Fungsi deteksi realtime ===
+      async function startRealtimeDetection() {
+        const context = canvas.getContext("2d");
+        let isProcessing = false;
+
+        async function detectFrame() {
+          if (!isRunning || isProcessing)
+            return requestAnimationFrame(detectFrame);
+          isProcessing = true;
+
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageData = canvas.toDataURL("image/jpeg", 0.5); // compress agar lebih cepat
+
+          try {
+            const response = await fetch(API_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ image: imageData }),
+            });
+
+            const result = await response.json();
+            if (!result.error) {
+              resultImage.src = result.image;
+              resultImage.classList.remove("hidden");
+              placeholder.classList.add("hidden");
+              detectionsList.innerHTML = "";
+
+              if (result.detections.length === 0) {
+                detectionsList.innerHTML =
+                  '<li class="text-sm text-gray-500 dark:text-gray-400 italic flex items-center space-x-2"><span>ℹ️</span><span>Tidak ada deteksi.</span></li>';
+              } else {
+                result.detections.forEach((det) => {
+                  const li = document.createElement("li");
+                  li.className =
+                    "flex items-center justify-between bg-white dark:bg-gray-700 rounded-lg p-2 shadow-sm transition-colors duration-300";
+                  li.innerHTML = `
+                    <span class="font-semibold text-gray-800 dark:text-gray-200">${det.label}</span>
+                    <span class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                      ${(det.confidence * 100).toFixed(1)}%
+                    </span>
+                  `;
+                  detectionsList.appendChild(li);
+                });
+              }
+            }
+          } catch (err) {
+            console.error("Gagal deteksi:", err);
+          } finally {
+            isProcessing = false;
+            requestAnimationFrame(detectFrame); // panggil frame berikutnya secepatnya
+          }
+        }
+
+        detectFrame();
+      }
+    </script>
+  </body>
+</html>

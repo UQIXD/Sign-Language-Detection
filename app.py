@@ -1,6 +1,7 @@
 # ================= INSTALL DEPENDENCY =================
 # pip install ultralytics flask flask-cors pillow numpy torch opencv-python
 
+import os
 import torch
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -83,8 +84,6 @@ def detect():
 
 # ================= RUN SERVER =================
 if __name__ == "__main__":
-    app.run(
-        host="0.0.0.0",  # bisa diakses HP 1 jaringan
-        port=5000,
-        debug=True
-    )
+    # Render menggunakan environment variable PORT
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

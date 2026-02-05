@@ -1,9 +1,7 @@
+torch
+torchvision
 flask
 flask-cors
 ultralytics
-torch
-torchvision
 Pillow
 numpy
-gunicorn
-opencv-python-headless

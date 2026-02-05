@@ -1,28 +1,24 @@
+# ================= INSTALL DEPENDENCY =================
+# pip install ultralytics flask flask-cors pillow numpy torch opencv-python
+
 import os
 import torch
-import io
-import base64
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from ultralytics import YOLO
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
+import io, base64
 
 # ================= CEK DEVICE =================
-# Di Railway/Cloud, hampir pasti menggunakan CPU. 
-# Pakai .lower() agar konsisten dengan parameter library.
 device = "cuda" if torch.cuda.is_available() else "cpu"
-print(f"🚀 Server Start. Device: {device.upper()}")
+print(f"🚀 Menggunakan Device: {device.upper()}")
 
 # ================= INIT FLASK =================
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # supaya HTML lokal tidak kena CORS
 
 # ================= LOAD MODEL =================
-model_path = "best.pt" 
-if not os.path.exists(model_path):
-    print(f"⚠️ Warning: {model_path} tidak ditemukan!")
-
-# Load model di luar route agar tidak load berulang-ulang (hemat RAM)
+model_path = "best.pt"  # SESUAIKAN PATH
 model = YOLO(model_path)
 model.to(device)
 
@@ -30,8 +26,7 @@ model.to(device)
 @app.route("/")
 def home():
     return jsonify({
-        "status": "ONLINE",
-        "engine": "YOLOv8",
+        "status": "LOCAL YOLOv8 SERVER ACTIVE",
         "device": device
     })
 
@@ -39,21 +34,15 @@ def home():
 def detect():
     try:
         data = request.get_json()
-        if not data or "image" not in data:
-            return jsonify({"error": "No image data provided"}), 400
-
         img_b64 = data.get("image")
-        
-        # Perbaikan: Handling format Base64 yang mungkin tidak punya header
-        if "," in img_b64:
-            header, encoded = img_b64.split(",", 1)
-        else:
-            encoded = img_b64
+        if not img_b64:
+            return jsonify({"error": "No image"}), 400
 
+        header, encoded = img_b64.split(",", 1)
         img_bytes = base64.b64decode(encoded)
         img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+        img_w, img_h = img.size
 
-        # Inference
         results = model.predict(
             img,
             conf=0.40,
@@ -65,28 +54,22 @@ def detect():
         draw = ImageDraw.Draw(img)
         detections = []
 
-        # Ambil hasil deteksi
         for box in results[0].boxes:
             cls_id = int(box.cls)
             conf = float(box.conf)
             label = model.names[cls_id].upper()
 
-            # Pastikan koordinat dipindah ke CPU sebelum ke list
-            coords = box.xyxy[0].cpu().numpy().tolist()
-            x1, y1, x2, y2 = coords
+            x1, y1, x2, y2 = box.xyxy[0].cpu().numpy().tolist()
 
             detections.append({
                 "label": label,
-                "confidence": round(conf, 2),
-                "bbox": [x1, y1, x2, y2]
+                "confidence": conf
             })
 
             # === DRAW BOX ===
             draw.rectangle([x1, y1, x2, y2], outline="lime", width=4)
-            # Opsional: Tambahkan penanganan jika font default tidak tersedia
-            draw.text((x1, max(0, y1 - 15)), f"{label} {int(conf*100)}%", fill="lime")
+            draw.text((x1, y1 - 10), f"{label} {int(conf*100)}%", fill="lime")
 
-        # Konversi balik ke Base64
         buffer = io.BytesIO()
         img.save(buffer, format="JPEG", quality=85)
         img_base64 = base64.b64encode(buffer.getvalue()).decode()
@@ -97,11 +80,10 @@ def detect():
         })
 
     except Exception as e:
-        print(f"❌ Error: {str(e)}") # Log error di terminal Railway
-        return jsonify({"error": "Internal server error", "details": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 # ================= RUN SERVER =================
 if __name__ == "__main__":
-    # Penting: Railway butuh port dari environment variable
+    # Render menggunakan environment variable PORT
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

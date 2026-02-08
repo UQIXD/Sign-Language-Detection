@@ -125,7 +125,7 @@
 
           <canvas id="canvas" class="hidden"></canvas>
 
-          <div class="flex gap-3 mt-4">
+          <!-- <div class="flex gap-3 mt-4">
             <button
               id="startButton"
               class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
@@ -140,6 +140,29 @@
             >
               <span class="text-xl">⏹️</span>
               <span>Hentikan</span>
+            </button>
+          </div> -->
+          <!-- BUTTONS -->
+          <div class="flex flex-col gap-3 mt-4">
+            <button
+              id="startButton"
+              class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold"
+            >
+              🎥 Nyalakan Kamera
+            </button>
+
+            <button
+              id="stopButton"
+              class="hidden bg-gradient-to-r from-red-600 to-pink-600 text-white py-3 rounded-xl font-semibold"
+            >
+              ⏹️ Hentikan
+            </button>
+
+            <button
+              id="switchCameraButton"
+              class="hidden bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-3 rounded-xl font-semibold"
+            >
+              🔄 Ganti Kamera
             </button>
           </div>
         </div>
@@ -859,6 +882,8 @@
 
       let isRunning = false;
       let stream = null;
+      // DEFAULT = KAMERA DEPAN
+      let currentFacingMode = "user";
 
       // === Dark Mode Toggle ===
       const theme = localStorage.getItem("theme") || "light";
@@ -888,6 +913,7 @@
           video.srcObject = stream;
           startButton.classList.add("hidden");
           stopButton.classList.remove("hidden");
+          switchCameraButton.classList.remove("hidden");
           liveIndicator.classList.remove("hidden");
           isRunning = true;
           startRealtimeDetection();
@@ -909,6 +935,7 @@
         video.srcObject = null;
         startButton.classList.remove("hidden");
         stopButton.classList.add("hidden");
+        switchCameraButton.classList.add("hidden");
         liveIndicator.classList.add("hidden");
 
         // Reset results
@@ -917,6 +944,22 @@
         placeholder.classList.remove("hidden");
         detectionsList.innerHTML =
           '<li class="text-sm text-gray-500 dark:text-gray-400 italic">Belum ada deteksi</li>';
+      };
+
+      // SWITCH CAMERA
+      switchCameraButton.onclick = async () => {
+        if (!stream) return;
+
+        stream.getTracks().forEach((t) => t.stop());
+
+        currentFacingMode =
+          currentFacingMode === "user" ? "environment" : "user";
+
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: currentFacingMode },
+        });
+
+        video.srcObject = stream;
       };
 
       // === Fungsi deteksi realtime ===

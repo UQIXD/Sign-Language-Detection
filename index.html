@@ -237,277 +237,104 @@
         </div>
 
         <!-- DAFTAR KATA -->
-        <div class="flex flex-wrap -mx-3 mb-8">
-          <!-- AYAH -->
-          <div
-            class="px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]"
-          >
-            <div
-              class="flex flex-col items-center bg-gradient-to-br from-purple-100 to-purple-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform"
-            >
-              <div
-                class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800"
-              >
-                <img
-                  src="img/AYAH.png"
-                  alt="Ayah"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <p
-                class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center"
-              >
-                Ayah
-              </p>
-              <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
-                Father
-              </p>
-            </div>
-          </div>
+        <div id="dictionary-container" class="flex flex-wrap -mx-3 mb-8"></div>
 
-          <!-- HALO -->
-          <div
-            class="px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]"
-          >
-            <div
-              class="flex flex-col items-center bg-gradient-to-br from-blue-100 to-blue-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform"
-            >
-              <div
-                class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800"
-              >
-                <img
-                  src="img/HALO.png"
-                  alt="Halo"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <p
-                class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center"
-              >
-                Halo
-              </p>
-              <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
-                Hello
-              </p>
-            </div>
-          </div>
+        <script>
+          // 1. Data disimpan dalam Array agar mudah dikelola
+          const vocabData = [
+            {
+              id: "AYAH",
+              indo: "Ayah",
+              eng: "Father",
+              color: "from-purple-100 to-purple-200",
+            },
+            {
+              id: "HALO",
+              indo: "Halo",
+              eng: "Hello",
+              color: "from-blue-100 to-blue-200",
+            },
+            {
+              id: "TIDUR",
+              indo: "Tidur",
+              eng: "Sleep",
+              color: "from-indigo-100 to-indigo-200",
+            },
+            {
+              id: "KAKAK",
+              indo: "Kakak",
+              eng: "Older sibling",
+              color: "from-pink-100 to-pink-200",
+            },
+            {
+              id: "MINUM",
+              indo: "Minum",
+              eng: "Drink",
+              color: "from-cyan-100 to-cyan-200",
+            },
+            {
+              id: "RUMAH",
+              indo: "Rumah",
+              eng: "House",
+              color: "from-amber-100 to-amber-200",
+            },
+            {
+              id: "SAMA SAMA",
+              indo: "Sama Sama",
+              eng: "You’re welcome",
+              color: "from-emerald-100 to-emerald-200",
+            },
+            {
+              id: "SEHAT",
+              indo: "Sehat",
+              eng: "Healthy",
+              color: "from-green-100 to-green-200",
+            },
+            {
+              id: "TERIMAKASIH",
+              indo: "Terima Kasih",
+              eng: "Thank you",
+              color: "from-rose-100 to-rose-200",
+            },
+            {
+              id: "TEMAN",
+              indo: "Teman",
+              eng: "Friend",
+              color: "from-sky-100 to-sky-200",
+            },
+          ];
 
-          <!-- TIDUR -->
-          <div
-            class="px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]"
-          >
-            <div
-              class="flex flex-col items-center bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform"
-            >
-              <div
-                class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800"
-              >
-                <img
-                  src="img/TIDUR.png"
-                  alt="Tidur"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <p
-                class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center"
-              >
-                Tidur
-              </p>
-              <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
-                Sleep
-              </p>
-            </div>
-          </div>
+          const dictionaryContainer = document.getElementById(
+            "dictionary-container",
+          );
 
-          <!-- KAKAK -->
-          <div
-            class="px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]"
-          >
-            <div
-              class="flex flex-col items-center bg-gradient-to-br from-pink-100 to-pink-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform"
-            >
-              <div
-                class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800"
-              >
-                <img
-                  src="img/KAKAK.png"
-                  alt="Kakak"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <p
-                class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center"
-              >
-                Kakak
-              </p>
-              <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
-                Older sibling
-              </p>
-            </div>
-          </div>
-
-          <!-- MINUM -->
-          <div
-            class="px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]"
-          >
-            <div
-              class="flex flex-col items-center bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform"
-            >
-              <div
-                class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800"
-              >
-                <img
-                  src="img/MINUM.png"
-                  alt="Minum"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <p
-                class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center"
-              >
-                Minum
-              </p>
-              <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
-                Drink
-              </p>
-            </div>
-          </div>
-
-          <!-- RUMAH -->
-          <div
-            class="px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]"
-          >
-            <div
-              class="flex flex-col items-center bg-gradient-to-br from-amber-100 to-amber-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform"
-            >
-              <div
-                class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800"
-              >
-                <img
-                  src="img/RUMAH.png"
-                  alt="Rumah"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <p
-                class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center"
-              >
-                Rumah
-              </p>
-              <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
-                House
-              </p>
-            </div>
-          </div>
-
-          <!-- SAMA SAMA -->
-          <div
-            class="px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]"
-          >
-            <div
-              class="flex flex-col items-center bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform"
-            >
-              <div
-                class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800"
-              >
-                <img
-                  src="img/SAMA SAMA.png"
-                  alt="Sama Sama"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <p
-                class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center"
-              >
-                Sama Sama
-              </p>
-              <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
-                You’re welcome
-              </p>
-            </div>
-          </div>
-
-          <!-- SEHAT -->
-          <div
-            class="px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]"
-          >
-            <div
-              class="flex flex-col items-center bg-gradient-to-br from-green-100 to-green-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform"
-            >
-              <div
-                class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800"
-              >
-                <img
-                  src="img/SEHAT.png"
-                  alt="Sehat"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <p
-                class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center"
-              >
-                Sehat
-              </p>
-              <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
-                Healthy
-              </p>
-            </div>
-          </div>
-
-          <!-- TERIMA KASIH -->
-          <div
-            class="px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]"
-          >
-            <div
-              class="flex flex-col items-center bg-gradient-to-br from-rose-100 to-rose-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform"
-            >
-              <div
-                class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800"
-              >
-                <img
-                  src="img/TERIMAKASIH.png"
-                  alt="Terima Kasih"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <p
-                class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center"
-              >
-                Terima Kasih
-              </p>
-              <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
-                Thank you
-              </p>
-            </div>
-          </div>
-
-          <!-- TEMAN -->
-          <div
-            class="px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]"
-          >
-            <div
-              class="flex flex-col items-center bg-gradient-to-br from-sky-100 to-sky-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform"
-            >
-              <div
-                class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800"
-              >
-                <img
-                  src="img/TEMAN.png"
-                  alt="Teman"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <p
-                class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center"
-              >
-                Teman
-              </p>
-              <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
-                Friend
-              </p>
-            </div>
-          </div>
-        </div>
+          // 2. Mapping data ke HTML dengan class yang persis sama
+          dictionaryContainer.innerHTML = vocabData
+            .map(
+              (item) => `
+                        <div class="px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]">
+                          <div class="flex flex-col items-center bg-gradient-to-br ${item.color} dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform">
+                            <div class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800">
+                              <img
+                                src="img/${item.id}.webp"
+                                alt="${item.indo}"
+                                loading="lazy" 
+                                decoding="async"
+                                class="w-full h-full object-cover"
+                              />
+                            </div>
+                            <p class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center">
+                              ${item.indo}
+                            </p>
+                            <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
+                              ${item.eng}
+                            </p>
+                          </div>
+                        </div>
+                      `,
+            )
+            .join("");
+        </script>
 
         <!-- PEMBATAS -->
         <div
@@ -515,320 +342,68 @@
         ></div>
 
         <!-- ABJAD -->
-        <!-- ABJAD -->
-        <div class="flex justify-center flex-wrap gap-5">
-          <!-- A -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-blue-100 to-blue-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/A.png"
-              alt="A"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">A</p>
-          </div>
+        <div
+          id="alphabet-container"
+          class="flex justify-center flex-wrap gap-5"
+        ></div>
 
-          <!-- B -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-purple-100 to-purple-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/B.png"
-              alt="B"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">B</p>
-          </div>
+        <script>
+          // 1. Data Alphabet dan Warna Gradiennya
+          const alphabetData = [
+            { char: "A", color: "from-blue-100 to-blue-200" },
+            { char: "B", color: "from-purple-100 to-purple-200" },
+            { char: "C", color: "from-pink-100 to-pink-200" },
+            { char: "D", color: "from-green-100 to-green-200" },
+            { char: "E", color: "from-yellow-100 to-yellow-200" },
+            { char: "F", color: "from-red-100 to-red-200" },
+            { char: "G", color: "from-indigo-100 to-indigo-200" },
+            { char: "H", color: "from-teal-100 to-teal-200" },
+            { char: "I", color: "from-cyan-100 to-cyan-200" },
+            { char: "J", color: "from-emerald-100 to-emerald-200" },
+            { char: "K", color: "from-lime-100 to-lime-200" },
+            { char: "L", color: "from-amber-100 to-amber-200" },
+            { char: "M", color: "from-orange-100 to-orange-200" },
+            { char: "N", color: "from-rose-100 to-rose-200" },
+            { char: "O", color: "from-fuchsia-100 to-fuchsia-200" },
+            { char: "P", color: "from-sky-100 to-sky-200" },
+            { char: "Q", color: "from-violet-100 to-violet-200" },
+            { char: "R", color: "from-rose-100 to-pink-200" },
+            { char: "S", color: "from-emerald-100 to-teal-200" },
+            { char: "T", color: "from-sky-100 to-blue-200" },
+            { char: "U", color: "from-blue-200 to-blue-300" },
+            { char: "V", color: "from-purple-200 to-purple-300" },
+            { char: "W", color: "from-pink-200 to-pink-300" },
+            { char: "X", color: "from-green-200 to-green-300" },
+            { char: "Y", color: "from-yellow-200 to-yellow-300" },
+            { char: "Z", color: "from-red-200 to-red-300" },
+          ];
 
-          <!-- C -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-pink-100 to-pink-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/C.png"
-              alt="C"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">C</p>
-          </div>
+          // 2. Pilih element container
+          const alphabetContainer =
+            document.getElementById("alphabet-container");
 
-          <!-- D -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-green-100 to-green-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/D.png"
-              alt="D"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">D</p>
-          </div>
+          // 3. Generate HTML menggunakan template literal
+          const htmlContent = alphabetData
+            .map(
+              (item) => `
+            <div class="flex flex-col items-center bg-gradient-to-br ${item.color} dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform cursor-pointer">
+                <img
+                    src="img/${item.char}.webp"
+                    alt="${item.char}"
+                    loading="lazy"
+                    decoding="async"
+                    class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
+                    onerror="this.src='https://via.placeholder.com/150?text=${item.char}'" 
+                />
+                <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">${item.char}</p>
+            </div>
+        `,
+            )
+            .join(""); // Menggabungkan array menjadi satu string HTML
 
-          <!-- E -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/E.png"
-              alt="E"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">E</p>
-          </div>
-
-          <!-- F -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-red-100 to-red-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/F.png"
-              alt="F"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">F</p>
-          </div>
-
-          <!-- G -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/G.png"
-              alt="G"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">G</p>
-          </div>
-
-          <!-- H -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-teal-100 to-teal-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/H.png"
-              alt="H"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">H</p>
-          </div>
-
-          <!-- I -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/I.png"
-              alt="I"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">I</p>
-          </div>
-
-          <!-- J -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/J.png"
-              alt="J"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">J</p>
-          </div>
-
-          <!-- K -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-lime-100 to-lime-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/K.png"
-              alt="K"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">K</p>
-          </div>
-
-          <!-- L -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-amber-100 to-amber-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/L.png"
-              alt="L"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">L</p>
-          </div>
-
-          <!-- M -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-orange-100 to-orange-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/M.png"
-              alt="M"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">M</p>
-          </div>
-
-          <!-- N -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-rose-100 to-rose-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/N.png"
-              alt="N"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">N</p>
-          </div>
-
-          <!-- O -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-fuchsia-100 to-fuchsia-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/O.png"
-              alt="O"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">O</p>
-          </div>
-
-          <!-- P -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-sky-100 to-sky-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/P.png"
-              alt="P"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">P</p>
-          </div>
-
-          <!-- Q -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-violet-100 to-violet-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/Q.png"
-              alt="Q"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">Q</p>
-          </div>
-
-          <!-- R -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-rose-100 to-pink-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/R.png"
-              alt="R"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">R</p>
-          </div>
-
-          <!-- S -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-emerald-100 to-teal-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/S.png"
-              alt="S"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">S</p>
-          </div>
-
-          <!-- T -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-sky-100 to-blue-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/T.png"
-              alt="T"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">T</p>
-          </div>
-
-          <!-- U -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-blue-200 to-blue-300 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/U.png"
-              alt="U"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">U</p>
-          </div>
-
-          <!-- V -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-purple-200 to-purple-300 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/V.png"
-              alt="V"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">V</p>
-          </div>
-
-          <!-- W -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-pink-200 to-pink-300 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/W.png"
-              alt="W"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">W</p>
-          </div>
-
-          <!-- X -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-green-200 to-green-300 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/X.png"
-              alt="X"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">X</p>
-          </div>
-
-          <!-- Y -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-yellow-200 to-yellow-300 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/Y.png"
-              alt="Y"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">Y</p>
-          </div>
-
-          <!-- Z -->
-          <div
-            class="flex flex-col items-center bg-gradient-to-br from-red-200 to-red-300 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform"
-          >
-            <img
-              src="img/Z.png"
-              alt="Z"
-              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-            />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">Z</p>
-          </div>
-        </div>
+          // 4. Masukkan ke dalam container
+          alphabetContainer.innerHTML = htmlContent;
+        </script>
 
         <!-- INFO -->
         <div

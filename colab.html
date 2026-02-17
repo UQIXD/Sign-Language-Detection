@@ -309,31 +309,37 @@
           );
 
           // 2. Mapping data ke HTML dengan class yang persis sama
-          dictionaryContainer.innerHTML = vocabData
-            .map(
-              (item) => `
-                        <div class="px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]">
-                          <div class="flex flex-col items-center bg-gradient-to-br ${item.color} dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform">
-                            <div class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800">
-                              <img
-                                src="img/${item.id}.webp"
-                                alt="${item.indo}"
-                                loading="lazy" 
-                                decoding="async"
-                                class="w-full h-full object-cover"
-                              />
-                            </div>
-                            <p class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center">
-                              ${item.indo}
-                            </p>
-                            <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
-                              ${item.eng}
-                            </p>
-                          </div>
-                        </div>
-                      `,
-            )
-            .join("");
+          const fragment = document.createDocumentFragment();
+
+          vocabData.forEach((item) => {
+            const wrapper = document.createElement("div");
+            wrapper.className =
+              "px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]";
+
+            wrapper.innerHTML = `
+                  <div class="flex flex-col items-center bg-gradient-to-br ${item.color} dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform">
+                    <div class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800">
+                      <img
+                        src="img/${item.id}.webp"
+                        alt="${item.indo}"
+                        loading="lazy"
+                        decoding="async"
+                        class="w-full h-full object-cover"
+                      />
+                    </div>
+                    <p class="font-bold text-gray-800 dark:text-gray-100 mt-3 text-center">
+                      ${item.indo}
+                    </p>
+                    <p class="text-xs text-gray-600 dark:text-gray-300 text-center">
+                      ${item.eng}
+                    </p>
+                  </div>
+                `;
+
+            fragment.appendChild(wrapper);
+          });
+
+          dictionaryContainer.appendChild(fragment);
         </script>
 
         <!-- PEMBATAS -->
@@ -450,10 +456,6 @@
       // 🔗 Ganti URL ngrok kamu di sini
       // Google Colab
       const API_URL = "https://simona-wraithlike-alicia.ngrok-free.dev/detect";
-      // Use VSCODE Tunnel
-      //   const API_URL = "https://8sfk9mth-5000.asse.devtunnels.ms/detect";
-      // Use Local
-      // const API_URL = "http://127.0.0.1:5000/detect";
 
       let isRunning = false;
       let stream = null;
@@ -550,13 +552,17 @@
           canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
           context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const imageData = canvas.toDataURL("image/jpeg", 0.5); // compress agar lebih cepat
+          const imageBlob = await new Promise((resolve) => {
+            canvas.toBlob(resolve, "image/jpeg", 0.5);
+          });
 
           try {
+            const formData = new FormData();
+            formData.append("image", imageBlob, "frame.jpg");
+
             const response = await fetch(API_URL, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ image: imageData }),
+              body: formData,
             });
 
             const result = await response.json();

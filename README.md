@@ -4,6 +4,23 @@ This repository contains resources related to an Indonesian Sign Language (BISIN
 
 ---
 
+## Local Development
+
+To run the server locally, open your terminal (**CMD**) and execute the following commands:
+
+1.  **Activate Virtual Environment:**
+
+    ```cmd
+    venv\Scripts\activate
+    ```
+
+2.  **Run the Application:**
+    ```cmd
+    python app.py
+    ```
+
+---
+
 ## Dataset
 
 **Word Dataset**  

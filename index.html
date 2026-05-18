@@ -37,16 +37,12 @@
     class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen transition-colors duration-300"
   >
     <!-- Header -->
-    <header
-      class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg sticky top-0 z-50 transition-colors duration-300"
-    >
+    <header class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg sticky top-0 z-50 transition-colors duration-300">
       <div class="container mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-3">
             <span class="text-4xl">🤟</span>
-            <h1
-              class="text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
-            >
+            <h1 class="text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Deteksi Bahasa Isyarat Realtime
             </h1>
           </div>
@@ -57,27 +53,15 @@
             class="p-3 rounded-xl bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all transform hover:scale-110 shadow-lg"
             title="Toggle Dark Mode"
           >
-            <svg
-              id="sunIcon"
-              class="w-6 h-6 text-yellow-500"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
+            <svg id="sunIcon" class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fill-rule="evenodd"
                 d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
                 clip-rule="evenodd"
               ></path>
             </svg>
-            <svg
-              id="moonIcon"
-              class="w-6 h-6 text-purple-600 hidden"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"
-              ></path>
+            <svg id="moonIcon" class="w-6 h-6 text-purple-600 hidden" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
             </svg>
           </button>
         </div>
@@ -88,34 +72,20 @@
       <!-- Grid Layout: Video (Kiri) dan Result (Kanan) -->
       <div class="grid lg:grid-cols-2 gap-6 mb-8">
         <!-- Video Section (Kiri) -->
-        <div
-          class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-6 fade-in transition-colors duration-300"
-        >
+        <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-6 fade-in transition-colors duration-300">
           <div class="flex items-center justify-between mb-4">
-            <h2
-              class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white flex items-center space-x-2"
-            >
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white flex items-center space-x-2">
               <span>📹</span>
               <span>Kamera Live</span>
             </h2>
-            <div
-              class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1 hidden"
-              id="liveIndicator"
-            >
+            <div class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1 hidden" id="liveIndicator">
               <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
               <span>LIVE</span>
             </div>
           </div>
 
-          <div
-            class="relative aspect-video bg-gray-900 rounded-2xl overflow-hidden border-4 pulse-border"
-          >
-            <video
-              id="video"
-              autoplay
-              playsinline
-              class="w-full h-full object-contain"
-            ></video>
+          <div class="relative aspect-video bg-gray-900 rounded-2xl overflow-hidden border-4 pulse-border">
+            <video id="video" autoplay playsinline class="w-full h-full object-contain"></video>
           </div>
 
           <canvas id="canvas" class="hidden"></canvas>
@@ -139,36 +109,23 @@
           </div> -->
           <!-- BUTTONS -->
           <div class="flex flex-col gap-3 mt-4">
-            <button
-              id="startButton"
-              class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold"
-            >
+            <button id="startButton" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold">
               🎥 Nyalakan Kamera
             </button>
 
-            <button
-              id="stopButton"
-              class="hidden bg-gradient-to-r from-red-600 to-pink-600 text-white py-3 rounded-xl font-semibold"
-            >
+            <button id="stopButton" class="hidden bg-gradient-to-r from-red-600 to-pink-600 text-white py-3 rounded-xl font-semibold">
               ⏹️ Hentikan
             </button>
 
-            <button
-              id="switchCameraButton"
-              class="hidden bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-3 rounded-xl font-semibold"
-            >
+            <button id="switchCameraButton" class="hidden bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-3 rounded-xl font-semibold">
               🔄 Ganti Kamera
             </button>
           </div>
         </div>
 
         <!-- Result Section (Kanan) -->
-        <div
-          class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-6 fade-in transition-colors duration-300"
-        >
-          <h2
-            class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center space-x-2"
-          >
+        <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-6 fade-in transition-colors duration-300">
+          <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center space-x-2">
             <span>🎯</span>
             <span>Hasil Deteksi</span>
           </h2>
@@ -177,37 +134,20 @@
             <div
               class="relative aspect-video bg-gray-100 dark:bg-gray-700 rounded-2xl overflow-hidden flex items-center justify-center border-4 border-gray-300 dark:border-gray-600 transition-colors duration-300"
             >
-              <img
-                id="resultImage"
-                class="w-full h-full object-contain hidden"
-              />
-              <div
-                id="placeholder"
-                class="text-center text-gray-400 dark:text-gray-500"
-              >
+              <img id="resultImage" class="w-full h-full object-contain hidden" />
+              <div id="placeholder" class="text-center text-gray-400 dark:text-gray-500">
                 <span class="text-5xl mb-2 block">👁️</span>
-                <p class="text-sm md:text-base">
-                  Hasil deteksi akan muncul di sini
-                </p>
+                <p class="text-sm md:text-base">Hasil deteksi akan muncul di sini</p>
               </div>
             </div>
 
-            <div
-              class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-4 transition-colors duration-300"
-            >
-              <h3
-                class="font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center space-x-2"
-              >
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-4 transition-colors duration-300">
+              <h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center space-x-2">
                 <span>📊</span>
                 <span>Deteksi Ditemukan:</span>
               </h3>
-              <ul
-                id="detectionsList"
-                class="space-y-2 text-gray-700 dark:text-gray-300 max-h-32 overflow-y-auto"
-              >
-                <li class="text-sm text-gray-500 dark:text-gray-400 italic">
-                  Belum ada deteksi
-                </li>
+              <ul id="detectionsList" class="space-y-2 text-gray-700 dark:text-gray-300 max-h-32 overflow-y-auto">
+                <li class="text-sm text-gray-500 dark:text-gray-400 italic">Belum ada deteksi</li>
               </ul>
             </div>
           </div>
@@ -215,62 +155,44 @@
       </div>
 
       <!-- Gallery Section -->
-      <div
-        class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-6 md:p-8 fade-in transition-colors duration-300"
-      >
+      <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-6 md:p-8 fade-in transition-colors duration-300">
         <!-- Judul -->
         <div class="text-center mb-8">
-          <h2
-            class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-2 flex items-center justify-center space-x-2"
-          >
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-2 flex items-center justify-center space-x-2">
             <span>📚</span>
             <span>Panduan Kosakata Bahasa Isyarat</span>
           </h2>
-          <p class="text-gray-600 dark:text-gray-300 text-sm md:text-base">
-            Contoh kosakata dan huruf dasar dalam bahasa isyarat
-          </p>
+          <p class="text-gray-600 dark:text-gray-300 text-sm md:text-base">Contoh kosakata dan huruf dasar dalam bahasa isyarat</p>
         </div>
 
         <!-- DAFTAR KATA -->
         <div id="dictionary-container" class="flex flex-wrap -mx-3 mb-8"></div>
 
         <!-- PEMBATAS -->
-        <div
-          class="w-32 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-8 rounded-full"
-        ></div>
+        <div class="w-32 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-8 rounded-full"></div>
 
         <!-- ABJAD -->
-        <div
-          id="alphabet-container"
-          class="flex justify-center flex-wrap gap-5"
-        ></div>
+        <div id="alphabet-container" class="flex justify-center flex-wrap gap-5"></div>
 
         <!-- INFO -->
         <div
           class="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-4 text-center transition-colors duration-300"
         >
           <p class="text-sm md:text-base text-gray-700 dark:text-gray-200">
-            💡 <strong>Catatan:</strong> Kosakata di atas adalah contoh. Gambar
-            dapat disesuaikan dengan dataset bahasa isyarat Anda.
+            💡 <strong>Catatan:</strong> Kosakata di atas adalah contoh. Gambar dapat disesuaikan dengan dataset bahasa isyarat Anda.
           </p>
         </div>
       </div>
     </main>
 
     <!-- Footer -->
-    <footer
-      class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md mt-12 py-6 transition-colors duration-300"
-    >
+    <footer class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md mt-12 py-6 transition-colors duration-300">
       <div class="container mx-auto px-4 text-center">
         <p class="text-gray-600 dark:text-gray-300 text-sm md:text-base">
           Dibuat dengan <span class="text-red-500">💙</span> oleh
-          <strong class="text-blue-600 dark:text-blue-400"
-            >Faruqi Rabbani</strong
-          >
+          <strong class="text-blue-600 dark:text-blue-400">Faruqi Rabbani</strong>
         </p>
-        <p class="text-gray-500 dark:text-gray-400 text-xs mt-2">
-          © 2025 - Deteksi Bahasa Isyarat Realtime
-        </p>
+        <p class="text-gray-500 dark:text-gray-400 text-xs mt-2">© 2025 - Deteksi Bahasa Isyarat Realtime</p>
       </div>
     </footer>
 
@@ -313,9 +235,7 @@
         sunIcon.classList.toggle("hidden");
         moonIcon.classList.toggle("hidden");
 
-        const currentTheme = document.documentElement.classList.contains("dark")
-          ? "dark"
-          : "light";
+        const currentTheme = document.documentElement.classList.contains("dark") ? "dark" : "light";
         localStorage.setItem("theme", currentTheme);
       };
 
@@ -366,8 +286,7 @@
         resultImage.classList.add("hidden");
         resultImage.src = "";
         placeholder.classList.remove("hidden");
-        detectionsList.innerHTML =
-          '<li class="text-sm text-gray-500 dark:text-gray-400 italic">Belum ada deteksi</li>';
+        detectionsList.innerHTML = '<li class="text-sm text-gray-500 dark:text-gray-400 italic">Belum ada deteksi</li>';
       };
 
       // SWITCH CAMERA
@@ -376,8 +295,7 @@
 
         stream.getTracks().forEach((t) => t.stop());
 
-        currentFacingMode =
-          currentFacingMode === "user" ? "environment" : "user";
+        currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
 
         stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: currentFacingMode },
@@ -392,8 +310,7 @@
         let isProcessing = false;
 
         async function detectFrame() {
-          if (!isRunning || isProcessing)
-            return requestAnimationFrame(detectFrame);
+          if (!isRunning || isProcessing) return requestAnimationFrame(detectFrame);
 
           isProcessing = true;
 
@@ -513,17 +430,14 @@
         },
       ];
 
-      const dictionaryContainer = document.getElementById(
-        "dictionary-container",
-      );
+      const dictionaryContainer = document.getElementById("dictionary-container");
 
       // 2. Mapping data ke HTML dengan class yang persis sama
       const fragment = document.createDocumentFragment();
 
       vocabData.forEach((item) => {
         const wrapper = document.createElement("div");
-        wrapper.className =
-          "px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]";
+        wrapper.className = "px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]";
 
         wrapper.innerHTML = `
                   <div class="flex flex-col items-center bg-gradient-to-br ${item.color} dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform">

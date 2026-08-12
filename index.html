@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Isyarat Kita</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A4%9F</text></svg>" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A4%9F</text></svg>"
+    />
     <link rel="stylesheet" href="css/style.css" />
     <style>
       @keyframes pulse-border {
@@ -211,9 +214,13 @@
       const sunIcon = document.getElementById("sunIcon");
       const moonIcon = document.getElementById("moonIcon");
 
-      // Backend & frontend satu origin (app.py serve index.html ini juga),
-      // jadi path relatif jalan baik lokal maupun setelah dideploy.
-      const API_URL = "/detect";
+      // 🔗 Ganti URL ngrok kamu di sini
+      // Google Colab
+      // const API_URL = "https://simona-wraithlike-alicia.ngrok-free.dev/detect";
+      // Use VSCODE Tunnel
+      // const API_URL = "https://8sfk9mth-5000.asse.devtunnels.ms/detect";
+      // Use Local
+      const API_URL = "http://127.0.0.1:5000/detect";
 
       let isRunning = false;
       let stream = null;

@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Realtime Deteksi Bahasa Isyarat</title>
+    <title>Isyarat Kita</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A4%9F</text></svg>" />
     <link rel="stylesheet" href="css/style.css" />
     <style>
       @keyframes pulse-border {
@@ -42,9 +43,10 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-3">
             <span class="text-4xl">🤟</span>
-            <h1 class="text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Deteksi Bahasa Isyarat Realtime
-            </h1>
+            <div>
+              <h1 class="text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Isyarat Kita</h1>
+              <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Deteksi Bahasa Isyarat Realtime</p>
+            </div>
           </div>
 
           <!-- Dark Mode Toggle -->
@@ -192,7 +194,7 @@
           Dibuat dengan <span class="text-red-500">💙</span> oleh
           <strong class="text-blue-600 dark:text-blue-400">Faruqi Rabbani</strong>
         </p>
-        <p class="text-gray-500 dark:text-gray-400 text-xs mt-2">© 2025 - Deteksi Bahasa Isyarat Realtime</p>
+        <p class="text-gray-500 dark:text-gray-400 text-xs mt-2">© 2025 - Isyarat Kita</p>
       </div>
     </footer>
 
@@ -209,13 +211,9 @@
       const sunIcon = document.getElementById("sunIcon");
       const moonIcon = document.getElementById("moonIcon");
 
-      // 🔗 Ganti URL ngrok kamu di sini
-      // Google Colab
-      // const API_URL = "https://simona-wraithlike-alicia.ngrok-free.dev/detect";
-      // Use VSCODE Tunnel
-      const API_URL = "https://8sfk9mth-5000.asse.devtunnels.ms/detect";
-      // Use Local
-      // const API_URL = "http://127.0.0.1:5000/detect";
+      // Backend & frontend satu origin (app.py serve index.html ini juga),
+      // jadi path relatif jalan baik lokal maupun setelah dideploy.
+      const API_URL = "/detect";
 
       let isRunning = false;
       let stream = null;
@@ -368,66 +366,16 @@
       // === Kata ===
       // 1. Data disimpan dalam Array agar mudah dikelola
       const vocabData = [
-        {
-          id: "AYAH",
-          indo: "Ayah",
-          eng: "Father",
-          color: "from-purple-100 to-purple-200",
-        },
-        {
-          id: "HALO",
-          indo: "Halo",
-          eng: "Hello",
-          color: "from-blue-100 to-blue-200",
-        },
-        {
-          id: "TIDUR",
-          indo: "Tidur",
-          eng: "Sleep",
-          color: "from-indigo-100 to-indigo-200",
-        },
-        {
-          id: "KAKAK",
-          indo: "Kakak",
-          eng: "Older sibling",
-          color: "from-pink-100 to-pink-200",
-        },
-        {
-          id: "MINUM",
-          indo: "Minum",
-          eng: "Drink",
-          color: "from-cyan-100 to-cyan-200",
-        },
-        {
-          id: "RUMAH",
-          indo: "Rumah",
-          eng: "House",
-          color: "from-amber-100 to-amber-200",
-        },
-        {
-          id: "SAMA SAMA",
-          indo: "Sama Sama",
-          eng: "You’re welcome",
-          color: "from-emerald-100 to-emerald-200",
-        },
-        {
-          id: "SEHAT",
-          indo: "Sehat",
-          eng: "Healthy",
-          color: "from-green-100 to-green-200",
-        },
-        {
-          id: "TERIMAKASIH",
-          indo: "Terima Kasih",
-          eng: "Thank you",
-          color: "from-rose-100 to-rose-200",
-        },
-        {
-          id: "TEMAN",
-          indo: "Teman",
-          eng: "Friend",
-          color: "from-sky-100 to-sky-200",
-        },
+        { id: "AYAH", indo: "Ayah", eng: "Father", color: "from-purple-100 to-purple-200" },
+        { id: "HALO", indo: "Halo", eng: "Hello", color: "from-blue-100 to-blue-200" },
+        { id: "TIDUR", indo: "Tidur", eng: "Sleep", color: "from-indigo-100 to-indigo-200" },
+        { id: "KAKAK", indo: "Kakak", eng: "Older sibling", color: "from-pink-100 to-pink-200" },
+        { id: "MINUM", indo: "Minum", eng: "Drink", color: "from-cyan-100 to-cyan-200" },
+        { id: "RUMAH", indo: "Rumah", eng: "House", color: "from-amber-100 to-amber-200" },
+        { id: "SAMA SAMA", indo: "Sama Sama", eng: "You’re welcome", color: "from-emerald-100 to-emerald-200" },
+        { id: "SEHAT", indo: "Sehat", eng: "Healthy", color: "from-green-100 to-green-200" },
+        { id: "TERIMAKASIH", indo: "Terima Kasih", eng: "Thank you", color: "from-rose-100 to-rose-200" },
+        { id: "TEMAN", indo: "Teman", eng: "Friend", color: "from-sky-100 to-sky-200" },
       ];
 
       const dictionaryContainer = document.getElementById("dictionary-container");
@@ -509,7 +457,7 @@
                     loading="lazy"
                     decoding="async"
                     class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl"
-                    onerror="this.src='https://via.placeholder.com/150?text=${item.char}'" 
+                    onerror="this.src='https://via.placeholder.com/150?text=${item.char}'"
                 />
                 <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">${item.char}</p>
             </div>

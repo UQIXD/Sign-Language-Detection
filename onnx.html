@@ -3,22 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Realtime Deteksi Bahasa Isyarat</title>
+    <title>Isyarat Kita</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A4%9F</text></svg>" />
     <!-- CDN Tailwind (jika tidak pakai file lokal) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = { darkMode: "class" };
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              bg: { DEFAULT: "#f8fafc", dark: "#171b22" },
+              primary: { DEFAULT: "#6d75d2", dark: "#8b92e8" },
+              accent: "#4fa98c",
+              card: { DEFAULT: "#ffffff", dark: "#1f2430" },
+            },
+          },
+        },
+      };
     </script>
     <!-- IMPORT ONNX RUNTIME WEB -->
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
     <style>
+      :root {
+        --color-primary: #6d75d2;
+        --color-accent: #4fa98c;
+      }
       @keyframes pulse-border {
         0%,
         100% {
-          border-color: #3b82f6;
+          border-color: var(--color-primary);
         }
         50% {
-          border-color: #8b5cf6;
+          border-color: var(--color-accent);
         }
       }
       .pulse-border {
@@ -40,7 +57,7 @@
     </style>
   </head>
   <body
-    class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen transition-colors duration-300"
+    class="bg-bg dark:bg-bg-dark min-h-screen transition-colors duration-300"
   >
     <!-- Header -->
     <header class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg sticky top-0 z-50 transition-colors duration-300">
@@ -48,9 +65,10 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-3">
             <span class="text-4xl">🤟</span>
-            <h1 class="text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Deteksi Bahasa Isyarat Realtime
-            </h1>
+            <div>
+              <h1 class="text-xl md:text-3xl font-bold text-primary dark:text-primary-dark">Isyarat Kita</h1>
+              <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Deteksi Bahasa Isyarat Realtime</p>
+            </div>
           </div>
 
           <!-- Dark Mode Toggle -->
@@ -78,7 +96,7 @@
       <!-- Grid Layout: Video (Kiri) dan Result (Kanan) -->
       <div class="grid lg:grid-cols-2 gap-6 mb-8">
         <!-- Video Section (Kiri) -->
-        <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-6 fade-in transition-colors duration-300">
+        <div class="bg-white dark:bg-gray-800 shadow-md rounded-3xl p-6 fade-in transition-colors duration-300">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white flex items-center space-x-2">
               <span>📹</span>
@@ -100,24 +118,24 @@
           <div class="flex flex-col gap-3 mt-4">
             <button
               id="startButton"
-              class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold opacity-50 cursor-not-allowed"
+              class="bg-primary hover:bg-primary/90 dark:bg-primary-dark text-white py-3 rounded-xl font-semibold transition-colors opacity-50 cursor-not-allowed"
               disabled
             >
               ⏳ Memuat Model AI...
             </button>
 
-            <button id="stopButton" class="hidden bg-gradient-to-r from-red-600 to-pink-600 text-white py-3 rounded-xl font-semibold">
+            <button id="stopButton" class="hidden bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-xl font-semibold transition-colors">
               ⏹️ Hentikan
             </button>
 
-            <button id="switchCameraButton" class="hidden bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-3 rounded-xl font-semibold">
+            <button id="switchCameraButton" class="hidden bg-accent hover:bg-accent/90 text-white py-3 rounded-xl font-semibold transition-colors">
               🔄 Ganti Kamera
             </button>
           </div>
         </div>
 
         <!-- Result Section (Kanan) -->
-        <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-6 fade-in transition-colors duration-300">
+        <div class="bg-white dark:bg-gray-800 shadow-md rounded-3xl p-6 fade-in transition-colors duration-300">
           <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center space-x-2">
             <span>🎯</span>
             <span>Hasil Deteksi</span>
@@ -134,7 +152,7 @@
               </div>
             </div>
 
-            <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-4 transition-colors duration-300">
+            <div class="bg-primary/5 dark:bg-gray-700 rounded-xl p-4 transition-colors duration-300">
               <h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center space-x-2">
                 <span>📊</span>
                 <span>Deteksi Ditemukan:</span>
@@ -148,7 +166,7 @@
       </div>
 
       <!-- Gallery Section (Sama Persis) -->
-      <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-6 md:p-8 fade-in transition-colors duration-300">
+      <div class="bg-white dark:bg-gray-800 shadow-md rounded-3xl p-6 md:p-8 fade-in transition-colors duration-300">
         <!-- Judul -->
         <div class="text-center mb-8">
           <h2 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-2 flex items-center justify-center space-x-2">
@@ -161,7 +179,7 @@
         <!-- DAFTAR KATA -->
         <div id="dictionary-container" class="flex flex-wrap -mx-3 mb-8"></div>
         <!-- PEMBATAS -->
-        <div class="w-32 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-8 rounded-full"></div>
+        <div class="w-32 h-1 bg-primary mx-auto mb-8 rounded-full"></div>
         <!-- ABJAD -->
         <div id="alphabet-container" class="flex justify-center flex-wrap gap-5"></div>
       </div>
@@ -174,7 +192,7 @@
           Dibuat dengan <span class="text-red-500">💙</span> oleh
           <strong class="text-blue-600 dark:text-blue-400">Faruqi Rabbani</strong>
         </p>
-        <p class="text-gray-500 dark:text-gray-400 text-xs mt-2">© 2025 - Deteksi Bahasa Isyarat Realtime</p>
+        <p class="text-gray-500 dark:text-gray-400 text-xs mt-2">© 2025 - Isyarat Kita</p>
       </div>
     </footer>
 
@@ -473,12 +491,12 @@
           const h = (det.y2 - det.y1) * yRatio;
 
           // Gambar Kotak
-          ctx.strokeStyle = "#3b82f6";
+          ctx.strokeStyle = "#6d75d2";
           ctx.lineWidth = 4;
           ctx.strokeRect(x, y, w, h);
 
           // Gambar Label
-          ctx.fillStyle = "#3b82f6";
+          ctx.fillStyle = "#6d75d2";
           ctx.font = "bold 20px Arial";
           const text = `${det.label} ${(det.score * 100).toFixed(1)}%`;
           const textWidth = ctx.measureText(text).width;
@@ -491,7 +509,7 @@
           li.className = "flex items-center justify-between bg-white dark:bg-gray-700 rounded-lg p-2 shadow-sm transition-colors duration-300";
           li.innerHTML = `
             <span class="font-semibold text-gray-800 dark:text-gray-200">${det.label}</span>
-            <span class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+            <span class="bg-primary text-white px-3 py-1 rounded-full text-xs font-bold">
               ${(det.score * 100).toFixed(1)}%
             </span>
           `;
@@ -508,16 +526,16 @@
       // DATA GALLERY (KATA & ABJAD - TETAP SAMA)
       // ==========================================
       const vocabData = [
-        { id: "AYAH", indo: "Ayah", eng: "Father", color: "from-purple-100 to-purple-200" },
-        { id: "HALO", indo: "Halo", eng: "Hello", color: "from-blue-100 to-blue-200" },
-        { id: "TIDUR", indo: "Tidur", eng: "Sleep", color: "from-indigo-100 to-indigo-200" },
-        { id: "KAKAK", indo: "Kakak", eng: "Older sibling", color: "from-pink-100 to-pink-200" },
-        { id: "MINUM", indo: "Minum", eng: "Drink", color: "from-cyan-100 to-cyan-200" },
-        { id: "RUMAH", indo: "Rumah", eng: "House", color: "from-amber-100 to-amber-200" },
-        { id: "SAMA SAMA", indo: "Sama Sama", eng: "You’re welcome", color: "from-emerald-100 to-emerald-200" },
-        { id: "SEHAT", indo: "Sehat", eng: "Healthy", color: "from-green-100 to-green-200" },
-        { id: "TERIMAKASIH", indo: "Terima Kasih", eng: "Thank you", color: "from-rose-100 to-rose-200" },
-        { id: "TEMAN", indo: "Teman", eng: "Friend", color: "from-sky-100 to-sky-200" },
+        { id: "AYAH", indo: "Ayah", eng: "Father" },
+        { id: "HALO", indo: "Halo", eng: "Hello" },
+        { id: "TIDUR", indo: "Tidur", eng: "Sleep" },
+        { id: "KAKAK", indo: "Kakak", eng: "Older sibling" },
+        { id: "MINUM", indo: "Minum", eng: "Drink" },
+        { id: "RUMAH", indo: "Rumah", eng: "House" },
+        { id: "SAMA SAMA", indo: "Sama Sama", eng: "You’re welcome" },
+        { id: "SEHAT", indo: "Sehat", eng: "Healthy" },
+        { id: "TERIMAKASIH", indo: "Terima Kasih", eng: "Thank you" },
+        { id: "TEMAN", indo: "Teman", eng: "Friend" },
       ];
 
       const dictionaryContainer = document.getElementById("dictionary-container");
@@ -526,7 +544,7 @@
         const wrapper = document.createElement("div");
         wrapper.className = "px-3 mb-6 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-[20%]";
         wrapper.innerHTML = `
-          <div class="flex flex-col items-center bg-gradient-to-br ${item.color} dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform">
+          <div class="flex flex-col items-center bg-primary/10 dark:bg-gray-700 rounded-2xl p-4 shadow-md w-full hover:scale-105 transition-transform">
             <div class="w-full aspect-square rounded-xl overflow-hidden bg-white dark:bg-gray-800">
               <img src="img/${item.id}.webp" alt="${item.indo}" loading="lazy" decoding="async" class="w-full h-full object-cover" />
             </div>
@@ -538,24 +556,15 @@
       });
       dictionaryContainer.appendChild(fragment);
 
-      const alphabetData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((char, i) => {
-        const colors = [
-          "from-blue-100 to-blue-200",
-          "from-purple-100 to-purple-200",
-          "from-pink-100 to-pink-200",
-          "from-green-100 to-green-200",
-          "from-yellow-100 to-yellow-200",
-        ];
-        return { char, color: colors[i % colors.length] };
-      });
+      const alphabetData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
       const alphabetContainer = document.getElementById("alphabet-container");
       alphabetContainer.innerHTML = alphabetData
         .map(
-          (item) => `
-        <div class="flex flex-col items-center bg-gradient-to-br ${item.color} dark:from-gray-700 dark:to-gray-600 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform cursor-pointer">
-            <img src="img/${item.char}.webp" alt="${item.char}" loading="lazy" decoding="async" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl" onerror="this.src='https://via.placeholder.com/150?text=${item.char}'" />
-            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">${item.char}</p>
+          (char) => `
+        <div class="flex flex-col items-center bg-primary/10 dark:bg-gray-700 rounded-2xl p-4 w-24 sm:w-28 md:w-32 shadow-md hover:scale-105 transition-transform cursor-pointer">
+            <img src="img/${char}.webp" alt="${char}" loading="lazy" decoding="async" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain rounded-xl" onerror="this.src='https://via.placeholder.com/150?text=${char}'" />
+            <p class="font-bold text-gray-800 dark:text-gray-100 mt-2">${char}</p>
         </div>
       `,
         )
